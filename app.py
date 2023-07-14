@@ -26,7 +26,7 @@ def main():
     tab1, tab2 = st.tabs(["🏡回答问题", "🕝更新模型"])
 
     # 上传文件
-    pdf = tab2.file_uploader("上传PDF文件", type="pdf")
+    pdf = tab2.file_uploader("上传PDF文件", type="pdf",help="不要频繁的更新知识库,不要上传大文件.")
     # 提取文本
     if pdf is not None:
         with tab2.empty():
