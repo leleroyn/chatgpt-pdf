@@ -45,7 +45,7 @@ def main():
         st_emt = st.empty()
         st_emt.write("⏳正在思考,请稍等...")
         knowledge = kb.KnowledgeService(faiss_path, faiss_index)
-        response, cb, source_documents = knowledge.query(chatgpt_model, user_question)
+        response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
         st_emt.write(response)
         # st.info(source_documents)
         st.info(cb)
