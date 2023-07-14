@@ -23,7 +23,7 @@ def main():
     else:
         faiss_path = "db/sit"
 
-    tab1, tab2 = st.tabs(["回答问题", "更新模型"])
+    tab1, tab2 = st.tabs(["🏡回答问题", "🕝更新模型"])
 
     # 上传文件
     pdf = tab2.file_uploader("上传PDF文件", type="pdf")
