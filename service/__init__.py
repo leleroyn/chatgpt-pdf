@@ -9,7 +9,7 @@ from langchain.text_splitter import CharacterTextSplitter
 
 class KnowledgeService(object):
 
-    def __int__(self, faiss_path, index_name):
+    def __init__(self, faiss_path, index_name):
         self.faiss_path = faiss_path
         self.index_name = index_name
 
