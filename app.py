@@ -3,12 +3,11 @@ import os
 import pdfplumber
 import streamlit as st
 from dotenv import load_dotenv
-from service import KnowledgeService
+from service import KnowledgeService as kb
 
 
 def main():
     chatgpt_model = "gpt-3.5-turbo"
-    candidate_number = 4
     faiss_index = "index"
 
     load_dotenv()
@@ -26,7 +25,7 @@ def main():
     tab1, tab2 = st.tabs(["🏡回答问题", "🕝更新模型"])
 
     # 上传文件
-    pdf = tab2.file_uploader("上传PDF文件", type="pdf",help="不要频繁的更新知识库,不要上传大文件.")
+    pdf = tab2.file_uploader("上传PDF文件", type="pdf", help="不要频繁的更新知识库,不要上传大文件.")
     # 提取文本
     if pdf is not None:
         with tab2.empty():
@@ -36,19 +35,19 @@ def main():
                 for page in pdf_reader.pages:
                     text += page.extract_text()
 
-            knowledge = KnowledgeService(faiss_path, faiss_index)
+            knowledge = kb.KnowledgeService(faiss_path, faiss_index).query(faiss_path, faiss_index)
             knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
 
             st.success("✔️更新模型成功.")
 
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
-        user_question = f"已知信息:{user_question}\n请基于上面的已知信息准确回答,如果不知道,直接回答”根据已有信息暂时无法回答您的问题，请联系客服.“,请用中文回答."
         st_emt = st.empty()
         st_emt.write("⏳正在思考,请稍等...")
-        knowledge = KnowledgeService(faiss_path, faiss_index)
-        response, cb = knowledge.query(chatgpt_model, user_question, candidate_number)
+        knowledge = kb.KnowledgeService(faiss_path, faiss_index)
+        response, cb, source_documents = knowledge.query(chatgpt_model, user_question)
         st_emt.write(response)
+        # st.info(source_documents)
         st.info(cb)
 
 
