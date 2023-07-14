@@ -3,7 +3,7 @@ import os
 import pdfplumber
 import streamlit as st
 from dotenv import load_dotenv
-from service import KnowledgeService as kb
+from service import *
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
                 for page in pdf_reader.pages:
                     text += page.extract_text()
 
-            knowledge = kb.KnowledgeService(faiss_path, faiss_index).query(faiss_path, faiss_index)
+            knowledge = KnowledgeService(faiss_path, faiss_index)
             knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
 
             st.success("✔️更新模型成功.")
@@ -44,7 +44,7 @@ def main():
     if user_question:
         st_emt = st.empty()
         st_emt.write("⏳正在思考,请稍等...")
-        knowledge = kb.KnowledgeService(faiss_path, faiss_index)
+        knowledge = KnowledgeService(faiss_path, faiss_index)
         response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
         st_emt.write(response)
         # st.info(source_documents)
