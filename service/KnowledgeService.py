@@ -1,4 +1,3 @@
-
 from langchain import FAISS
 from langchain.callbacks import get_openai_callback
 from langchain.chains.question_answering import load_qa_chain
@@ -7,7 +6,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 
 
-class KnowledgeService:
+class KnowledgeService(object):
 
     def __init__(self, faiss_path, index_name):
         self.faiss_path = faiss_path
