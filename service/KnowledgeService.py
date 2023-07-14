@@ -49,5 +49,7 @@ class KnowledgeService(object):
             # 回答的文本内容
             result = qa({"query": user_question})
             response = result["result"]
-            source_documents = result["source_documents"]
+            # return_source_documents = True 才有这个参数
+            # source_documents = result["source_documents"]
+            source_documents = ""
         return response, source_documents, cb
