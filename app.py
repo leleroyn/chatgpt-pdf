@@ -7,7 +7,6 @@ from service import *
 
 
 def main():
-    pdf = None
     chatgpt_model = "gpt-3.5-turbo"
     faiss_index = "index"
 
@@ -46,11 +45,15 @@ def main():
 
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
-        st_emt = st.empty()
-        st_emt.write("⏳正在思考,请稍等...")
+        st_user = st.chat_message("user")
+        st_user.write(user_question)
+        st_emp = st.empty()
+        st_emp.write("<p style=\"text-align: left;width:100%\">⏳ 正在思考中...</p>",unsafe_allow_html=True)
         knowledge = KnowledgeService(faiss_path, faiss_index)
         response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
-        st_emt.write(response)
+        st_assistant = st.chat_message("assistant")
+        st_assistant.write(response)
+        st_emp.empty()
         # st.info(source_documents)
         st.info(cb)
 
