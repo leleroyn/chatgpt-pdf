@@ -18,7 +18,7 @@ def main():
         if ss not in st.session_state:
             st.session_state[ss] = []
 
-    st.set_page_config(page_title="知识库",menu_items={})
+    st.set_page_config(page_title="知识库", menu_items={})
     st.header("专属PDF知识库💬")
     kb_option_list = ("当前新版本", "历史版本")
     kb_option = st.selectbox("指定知识库模型", kb_option_list)
@@ -51,14 +51,12 @@ def main():
 
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
-        odd_index = 0
         if len(st.session_state["session_state_question"]) > 0:
-            for q in st.session_state["session_state_question"]:
+            for index in range(len(st.session_state["session_state_question"])):
                 st_odd_user = st.chat_message("user")
-                st_odd_user.write(q)
+                st_odd_user.write(st.session_state["session_state_question"][index])
                 st_odd_assistant = st.chat_message("assistant")
-                st_odd_assistant.write(st.session_state["session_state_answer"][odd_index])
-                odd_index += 1
+                st_odd_assistant.write(st.session_state["session_state_answer"][index])
 
         st_user = st.chat_message("user")
         st_user.write(user_question)
