@@ -44,7 +44,7 @@ def main():
                         text += page.extract_text()
 
                 knowledge = KnowledgeService(faiss_path, faiss_index)
-                knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"))
+                knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
             tab2_emt.success("✔️更新模型成功.")
         else:
             tab2_emt.warning("请上传模型文件.")
@@ -60,13 +60,11 @@ def main():
 
         st_user = st.chat_message("user", avatar="🧑")
         st_user.write(user_question)
-        st_emp = st.empty()
-        st_emp.write("<p style=\"text-align: left;width:100%\">⏳ 正在思考中...</p>", unsafe_allow_html=True)
-        knowledge = KnowledgeService(faiss_path, faiss_index)
-        response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
+        with st.spinner("正在思考中..."):
+            knowledge = KnowledgeService(faiss_path, faiss_index)
+            response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
         st_assistant = st.chat_message("assistant", avatar="🤖")
         st_assistant.write(response)
-        st_emp.empty()
         st.info(source_documents)
         st.info(cb)
         if response is not None and response.strip():
