@@ -26,18 +26,20 @@ class KnowledgeService(object):
                                           index_name=self.index_name)
         llm = ChatOpenAI(model_name=model, temperature=0)
 
-        prompt_template = """参考下面已知的信息,请用中文专业且简洁的回答下面提出的问题.
-
+        prompt_template = """
+        Use the following context to answer the user's question.
+        If you don't know the answer, say you don't, don't try to make it up. And answer in Chinese.
+        -----------
         {context}
-
-        问题: {question}
+        -----------
+        question: {question}
         """
         prompt = PromptTemplate(
             template=prompt_template, input_variables=["context", "question"]
         )
         chain_type_kwargs = {"prompt": prompt}
         qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
-                                         retriever=knowledge_base.as_retriever(search_kwargs={"k": 3}),
+                                         retriever=knowledge_base.as_retriever(search_kwargs={"k": 2}),
                                          chain_type_kwargs=chain_type_kwargs, return_source_documents=False)
 
         # 如需追踪花了多少钱
@@ -53,7 +55,7 @@ class KnowledgeService(object):
     # 自定义句子分段的方式，保证句子不被截断
     def split_paragraph(self, text, chunk_size=300, chunk_overlap=20):
         text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n","\r","\n\r","\r\n"],
+            separators=["\n","\n\n","\r","\r\n"],
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             length_function=len,
