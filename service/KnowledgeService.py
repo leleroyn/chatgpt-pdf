@@ -1,11 +1,9 @@
 from langchain import FAISS, PromptTemplate
 from langchain.callbacks import get_openai_callback
 from langchain.chains import RetrievalQA
-from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
-import re
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 class KnowledgeService(object):
@@ -14,9 +12,9 @@ class KnowledgeService(object):
         self.faiss_path = faiss_path
         self.index_name = index_name
 
-    def gen(self, text, chunk_size,chunk_overlap):
+    def gen(self, text, chunk_size, chunk_overlap):
         # 文本分片
-        docs = self.split_paragraph(text, int(chunk_size, 10),int(chunk_overlap, 10))
+        docs = self.split_paragraph(text, int(chunk_size, 10), int(chunk_overlap, 10))
         embeddings = OpenAIEmbeddings()
         db = FAISS.from_documents(docs, embeddings)
         db.save_local(self.faiss_path, self.index_name)
@@ -28,7 +26,7 @@ class KnowledgeService(object):
 
         prompt_template = """
         Use the following context to answer the user's question.
-        If you don't know the answer, say you don't, don't try to make it up. And answer in Chinese.
+        If you don't know the answer, say you don't know. Don't try to make it up! And answer in Chinese.
         -----------
         {context}
         -----------
@@ -55,7 +53,7 @@ class KnowledgeService(object):
     # 自定义句子分段的方式，保证句子不被截断
     def split_paragraph(self, text, chunk_size=300, chunk_overlap=20):
         text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n","\n\n","\r","\r\n"],
+            separators=["\n", "\n\n", "\r", "\r\n"],
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             length_function=len,
