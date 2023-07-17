@@ -18,7 +18,7 @@ def main():
         if ss not in st.session_state:
             st.session_state[ss] = []
 
-    st.set_page_config(page_title="知识库")
+    st.set_page_config(page_title="知识库",menu_items={})
     st.header("专属PDF知识库💬")
     kb_option_list = ("当前新版本", "历史版本")
     kb_option = st.selectbox("指定知识库模型", kb_option_list)
@@ -74,6 +74,15 @@ def main():
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
             st.session_state["session_state_answer"].append(response)
+
+    # 隐藏右边的菜单以及页脚
+    hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+    """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
