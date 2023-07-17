@@ -37,14 +37,14 @@ def main():
         tab2_emt = tab2.empty()
         # 提取文本
         if pdf is not None:
-            tab2_emt.write("⏳正在更新模型...")
-            text = ""
-            with pdfplumber.open(pdf) as pdf_reader:
-                for page in pdf_reader.pages:
-                    text += page.extract_text()
+            with st.spinner("正在更新模型..."):
+                text = ""
+                with pdfplumber.open(pdf) as pdf_reader:
+                    for page in pdf_reader.pages:
+                        text += page.extract_text()
 
-            knowledge = KnowledgeService(faiss_path, faiss_index)
-            knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
+                knowledge = KnowledgeService(faiss_path, faiss_index)
+                knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"))
             tab2_emt.success("✔️更新模型成功.")
         else:
             tab2_emt.warning("请上传模型文件.")
@@ -53,21 +53,21 @@ def main():
     if user_question:
         if len(st.session_state["session_state_question"]) > 0:
             for index in range(len(st.session_state["session_state_question"])):
-                st_odd_user = st.chat_message("user")
+                st_odd_user = st.chat_message("user", avatar="🧑")
                 st_odd_user.write(st.session_state["session_state_question"][index])
-                st_odd_assistant = st.chat_message("assistant")
+                st_odd_assistant = st.chat_message("assistant", avatar="🤖")
                 st_odd_assistant.write(st.session_state["session_state_answer"][index])
 
-        st_user = st.chat_message("user")
+        st_user = st.chat_message("user", avatar="🧑")
         st_user.write(user_question)
         st_emp = st.empty()
         st_emp.write("<p style=\"text-align: left;width:100%\">⏳ 正在思考中...</p>", unsafe_allow_html=True)
         knowledge = KnowledgeService(faiss_path, faiss_index)
         response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
-        st_assistant = st.chat_message("assistant")
+        st_assistant = st.chat_message("assistant", avatar="🤖")
         st_assistant.write(response)
         st_emp.empty()
-        # st.info(source_documents)
+        st.info(source_documents)
         st.info(cb)
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)

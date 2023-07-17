@@ -5,6 +5,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
+import re
 
 
 class KnowledgeService(object):
@@ -13,15 +14,9 @@ class KnowledgeService(object):
         self.faiss_path = faiss_path
         self.index_name = index_name
 
-    def gen(self, text, chunk_size, chunk_overlap):
+    def gen(self, text, chunk_size):
         # 文本分片
-        text_splitter = CharacterTextSplitter(
-            separator="\n",
-            chunk_size=int(chunk_size, 10),
-            chunk_overlap=int(chunk_overlap, 10),
-            length_function=len
-        )
-        docs = text_splitter.split_text(text)
+        docs = self.split_paragraph(text, int(chunk_size, 10))
         embeddings = OpenAIEmbeddings()
         db = FAISS.from_texts(docs, embeddings)
         db.save_local(self.faiss_path, self.index_name)
@@ -42,8 +37,9 @@ class KnowledgeService(object):
             template=prompt_template, input_variables=["context", "question"]
         )
         chain_type_kwargs = {"prompt": prompt}
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=knowledge_base.as_retriever(),
-                                         chain_type_kwargs=chain_type_kwargs, return_source_documents=False)
+        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff",
+                                         retriever=knowledge_base.as_retriever(search_kwargs={"k": 10}),
+                                         chain_type_kwargs=chain_type_kwargs, return_source_documents=True)
 
         # 如需追踪花了多少钱
         with get_openai_callback() as cb:
@@ -51,6 +47,40 @@ class KnowledgeService(object):
             result = qa({"query": user_question})
             response = result["result"]
             # return_source_documents = True 才有这个参数
-            # source_documents = result["source_documents"]
-            source_documents = ""
+            source_documents = result["source_documents"]
+            # source_documents = ""
         return response, source_documents, cb
+
+    # 自定义句子分段的方式，保证句子不被截断
+    def split_paragraph(self, text, max_length=300):
+        text = text.replace('\n', '')
+        text = text.replace('\n\n', '')
+        text = re.sub(r'\s+', ' ', text)
+        """
+        将文章分段
+        """
+        # 首先按照句子分割文章
+        sentences = re.split(r'(|；|。|！|!|\.|？|\?)', text)
+
+        new_sends = []
+        for i in range(int(len(sentences) / 2)):
+            sent = sentences[2 * i] + sentences[2 * i + 1]
+            new_sends.append(sent)
+        if len(sentences) % 2 == 1:
+            new_sends.append(sentences[len(sentences) - 1])
+
+        # 按照要求分段
+        paragraphs = []
+        current_length = 0
+        current_paragraph = ""
+        for sentence in new_sends:
+            sentence_length = len(sentence)
+            if current_length + sentence_length <= max_length:
+                current_paragraph += sentence
+                current_length += sentence_length
+            else:
+                paragraphs.append(current_paragraph.strip())
+                current_paragraph = sentence
+                current_length = sentence_length
+        paragraphs.append(current_paragraph.strip())
+        return paragraphs
