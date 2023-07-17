@@ -65,7 +65,8 @@ def main():
             response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
         st_assistant = st.chat_message("assistant", avatar="🤖")
         st_assistant.write(response)
-        st.info(source_documents)
+        if source_documents is not None and len(source_documents) > 0:
+            st.info(source_documents)
         st.info(cb)
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
@@ -73,11 +74,11 @@ def main():
 
     # 隐藏右边的菜单以及页脚
     hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-    """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        </style>
+        """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
