@@ -12,6 +12,12 @@ def main():
 
     load_dotenv()
 
+    # 用于保存历史对话
+    ss_list = ["session_state_question", "session_state_answer"]
+    for ss in ss_list:
+        if ss not in st.session_state:
+            st.session_state[ss] = []
+
     st.set_page_config(page_title="知识库")
     st.header("专属PDF知识库💬")
     kb_option_list = ("当前新版本", "历史版本")
@@ -45,10 +51,19 @@ def main():
 
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
+        odd_index = 0
+        if len(st.session_state["session_state_question"]) > 0:
+            for q in st.session_state["session_state_question"]:
+                st_odd_user = st.chat_message("user")
+                st_odd_user.write(q)
+                st_odd_assistant = st.chat_message("assistant")
+                st_odd_assistant.write(st.session_state["session_state_answer"][odd_index])
+                odd_index += 1
+
         st_user = st.chat_message("user")
         st_user.write(user_question)
         st_emp = st.empty()
-        st_emp.write("<p style=\"text-align: left;width:100%\">⏳ 正在思考中...</p>",unsafe_allow_html=True)
+        st_emp.write("<p style=\"text-align: left;width:100%\">⏳ 正在思考中...</p>", unsafe_allow_html=True)
         knowledge = KnowledgeService(faiss_path, faiss_index)
         response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
         st_assistant = st.chat_message("assistant")
@@ -56,6 +71,9 @@ def main():
         st_emp.empty()
         # st.info(source_documents)
         st.info(cb)
+        if response is not None and response.strip():
+            st.session_state["session_state_question"].append(user_question)
+            st.session_state["session_state_answer"].append(response)
 
 
 if __name__ == '__main__':
