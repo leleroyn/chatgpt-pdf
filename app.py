@@ -10,8 +10,9 @@ from service.ChatgptService import *
 def main():
     chatgpt_model = "gpt-3.5-turbo"
     faiss_index = "index"
-
     load_dotenv()
+
+    st.set_page_config(page_title="人工智能", menu_items={})
 
     # 用于保存历史对话
     ss_list = ["session_state_question", "session_state_answer"]
@@ -19,8 +20,12 @@ def main():
         if ss not in st.session_state:
             st.session_state[ss] = []
 
-    st.set_page_config(page_title="知识库", menu_items={})
-    st.header("专属PDF知识库💬")
+    # 隐藏右边的菜单以及页脚
+    hide_streamlit_style = """<style> #MainMenu {visibility: hidden;} footer {visibility: hidden;} p {
+    font-size:14px}</style>"""
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+    st.header("💬Chatgpt人工智能体验")
     kb_option_list = ("当前新版本", "历史版本")
     kb_option = st.selectbox("指定知识库模型", kb_option_list)
 
@@ -33,7 +38,7 @@ def main():
 
     # 上传文件
     pdf = tab2.file_uploader("上传PDF文件", type="pdf", help="不要频繁的更新知识库,不要上传大文件.", key="pdf")
-    tab1_ck = tab1.checkbox("使用自定义模型")
+    tab1_ck = st.checkbox("仅使用自定义模型")
 
     if tab2.button("更新模型↩️"):
         tab2_emt = tab2.empty()
@@ -81,15 +86,6 @@ def main():
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
             st.session_state["session_state_answer"].append(response)
-
-    # 隐藏右边的菜单以及页脚
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-        """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
