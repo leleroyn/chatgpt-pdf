@@ -4,6 +4,7 @@ import pdfplumber
 import streamlit as st
 from dotenv import load_dotenv
 from service import *
+from service.ChatgptService import *
 
 
 def main():
@@ -32,6 +33,7 @@ def main():
 
     # 上传文件
     pdf = tab2.file_uploader("上传PDF文件", type="pdf", help="不要频繁的更新知识库,不要上传大文件.", key="pdf")
+    tab1_ck = tab1.checkbox("使用自定义模型")
 
     if tab2.button("更新模型↩️"):
         tab2_emt = tab2.empty()
@@ -61,8 +63,16 @@ def main():
         st_user = st.chat_message("user", avatar="🧑")
         st_user.write(user_question)
         with st.spinner("正在思考中..."):
-            knowledge = KnowledgeService(faiss_path, faiss_index)
-            response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
+            if tab1_ck:
+                knowledge = KnowledgeService(faiss_path, faiss_index)
+                response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
+            else:
+                chatgpt_service = ChatgptService(chatgpt_model)
+                response, source_documents, cb = chatgpt_service.query(user_question, st.session_state[
+                                                                                          "session_state_question"][
+                                                                                      -5:],
+                                                                       st.session_state[
+                                                                           "session_state_answer"][-5:])
         st_assistant = st.chat_message("assistant", avatar="🤖")
         st_assistant.write(response)
         if source_documents is not None and len(source_documents) > 0:
