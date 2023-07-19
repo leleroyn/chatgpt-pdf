@@ -1,6 +1,7 @@
-from langchain import  PromptTemplate, LLMChain
+from langchain import PromptTemplate, LLMChain
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
+
 
 class ChatgptService:
     def __init__(self, model_name):
