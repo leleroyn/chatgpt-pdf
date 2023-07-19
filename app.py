@@ -25,7 +25,7 @@ def main():
     font-size:14px}</style>"""
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    st.header("💬Chatgpt人工智能体验")
+    st.header("🏡Chatgpt人工智能体验")
     kb_option_list = ("当前新版本", "历史版本")
     kb_option = st.selectbox("指定知识库模型", kb_option_list)
 
@@ -34,11 +34,11 @@ def main():
     else:
         faiss_path = "db/sit"
 
-    tab1, tab2 = st.tabs(["🏡回答问题", "🕝更新模型"])
+    tab1, tab2 = st.tabs(["💬回答问题", "🕝更新模型"])
 
     # 上传文件
     pdf = tab2.file_uploader("上传PDF文件", type="pdf", help="不要频繁的更新知识库,不要上传大文件.", key="pdf")
-    tab1_ck = st.checkbox("仅使用自定义模型")
+    tab1_ck = tab1.checkbox("仅使用自定义模型")
 
     if tab2.button("更新模型↩️"):
         tab2_emt = tab2.empty()
