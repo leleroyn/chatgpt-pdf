@@ -53,7 +53,6 @@ class KnowledgeService(object):
     # 自定义句子分段的方式，保证句子不被截断
     def split_paragraph(self, text, chunk_size=300, chunk_overlap=20):
         text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n", "\n\n", "\r", "\r\n"],
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             length_function=len,

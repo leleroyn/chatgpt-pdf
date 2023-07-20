@@ -1,8 +1,12 @@
 import os
 
+import docx
+import filetype
 import pdfplumber
 import streamlit as st
 from dotenv import load_dotenv
+from langchain.document_loaders import UnstructuredWordDocumentLoader
+
 from service import *
 from service.ChatgptService import *
 
@@ -37,18 +41,27 @@ def main():
     tab1, tab2 = st.tabs(["💬回答问题", "🕝更新模型"])
 
     # 上传文件
-    pdf = tab2.file_uploader("上传PDF文件", type="pdf", help="不要频繁的更新知识库,不要上传大文件.", key="pdf")
+    upload_file = tab2.file_uploader("上传文件", type=["pdf", "docx"], help="不要频繁的更新知识库,不要上传大文件.")
     tab1_ck = tab1.checkbox("仅使用自定义模型")
 
     if tab2.button("更新模型↩️"):
         tab2_emt = tab2.empty()
         # 提取文本
-        if pdf is not None:
+        if upload_file is not None:
+            text = ""
             with st.spinner("正在更新模型..."):
-                text = ""
-                with pdfplumber.open(pdf) as pdf_reader:
-                    for page in pdf_reader.pages:
-                        text += page.extract_text()
+                file_kind = filetype.guess_extension(upload_file).lower()
+                if file_kind == "pdf":
+                    with pdfplumber.open(upload_file) as pdf_reader:
+                        for page in pdf_reader.pages:
+                            text += page.extract_text()
+                elif file_kind == "docx":
+                    docx_file = docx.Document(upload_file)
+                    for para in docx_file.paragraphs:
+                        text += para.text + "\n"
+                else:
+                    tab2_emt.warning("不受支持的文件类型！")
+                    return
 
                 knowledge = KnowledgeService(faiss_path, faiss_index)
                 knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
