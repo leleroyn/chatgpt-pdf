@@ -5,8 +5,6 @@ import filetype
 import pdfplumber
 import streamlit as st
 from dotenv import load_dotenv
-from langchain.document_loaders import UnstructuredWordDocumentLoader
-
 from service import *
 from service.ChatgptService import *
 

@@ -1,1 +1,2 @@
-from service.KnowledgeService import *
+from . import KnowledgeService
+from . import ChatgptService
