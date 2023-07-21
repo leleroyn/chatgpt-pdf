@@ -77,15 +77,15 @@ def main():
         else:
             tab2_emt.warning("请上传模型文件.")
 
+    if len(st.session_state["session_state_question"]) > 0:
+        for index in range(len(st.session_state["session_state_question"])):
+            st_odd_user = st.chat_message("user", avatar="🧑")
+            st_odd_user.write(st.session_state["session_state_question"][index])
+            st_odd_assistant = st.chat_message("assistant", avatar="🤖")
+            st_odd_assistant.write(st.session_state["session_state_answer"][index])
+
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
-        if len(st.session_state["session_state_question"]) > 0:
-            for index in range(len(st.session_state["session_state_question"])):
-                st_odd_user = st.chat_message("user", avatar="🧑")
-                st_odd_user.write(st.session_state["session_state_question"][index])
-                st_odd_assistant = st.chat_message("assistant", avatar="🤖")
-                st_odd_assistant.write(st.session_state["session_state_answer"][index])
-
         st_user = st.chat_message("user", avatar="🧑")
         st_user.write(user_question)
         with st.spinner("正在思考中..."):
@@ -99,8 +99,8 @@ def main():
                                                                                       -5:],
                                                                        st.session_state[
                                                                            "session_state_answer"][-5:])
-        st_assistant = st.chat_message("assistant", avatar="🤖")
-        st_assistant.write(response)
+        st_odd_assistant = st.chat_message("assistant", avatar="🤖")
+        st_odd_assistant.write(response)
         if source_documents is not None and len(source_documents) > 0:
             st.info(source_documents)
         st.info(cb)
