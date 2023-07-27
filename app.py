@@ -64,26 +64,26 @@ def main():
                                     txt_line = txt_bits.decode("gbk")
                                 text += txt_line + "\n"
                     else:
-                        tab2_emt.warning("不受支持的文件类型！")
+                        tab2_emt.warning("不受支持的文件类型！", icon="⚠️")
                         st.stop()
                 knowledge = KnowledgeService(faiss_path, faiss_index)
                 knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
             tab2_emt.success("✔️更新模型成功.")
-            st.toast("✔️更新模型成功.")
+            st.toast("更新模型成功.", icon="✔️")
         else:
-            tab2_emt.warning("请上传模型文件.")
+            tab2_emt.warning("请上传模型文件.", icon="⚠️")
             st.stop()
 
     if len(st.session_state["session_state_question"]) > 0:
         for index in range(len(st.session_state["session_state_question"])):
-            st_odd_user = st.chat_message("user", avatar="🧑")
+            st_odd_user = tab1.chat_message("user", avatar="🧑")
             st_odd_user.write(st.session_state["session_state_question"][index])
-            st_odd_assistant = st.chat_message("assistant", avatar="🤖")
+            st_odd_assistant = tab1.chat_message("assistant", avatar="🤖")
             st_odd_assistant.write(st.session_state["session_state_answer"][index])
 
     user_question = st.chat_input("❓来向我提问吧：")
     if user_question:
-        st_user = st.chat_message("user", avatar="🧑")
+        st_user = tab1.chat_message("user", avatar="🧑")
         st_user.write(user_question)
         with st.spinner("正在思考中..."):
             if kb_option == chatgpt_model:
@@ -97,11 +97,11 @@ def main():
                 knowledge = KnowledgeService(faiss_path, faiss_index)
                 response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
 
-        st_odd_assistant = st.chat_message("assistant", avatar="🤖")
+        st_odd_assistant = tab1.chat_message("assistant", avatar="🤖")
         st_odd_assistant.write(response)
         if source_documents is not None and len(source_documents) > 0:
-            st.info(source_documents)
-        st.info(cb)
+            tab1.info(source_documents)
+        tab1.info(cb)
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
             st.session_state["session_state_answer"].append(response)
