@@ -14,7 +14,7 @@ def main():
     faiss_index = "index"
     load_dotenv()
 
-    st.set_page_config(page_title="人工智能", menu_items={})
+    st.set_page_config(page_title="人工智能", layout="wide", menu_items={})
 
     # 用于保存历史对话
     ss_list = ["session_state_question", "session_state_answer"]
@@ -70,10 +70,11 @@ def main():
                                 text += txt_line + "\n"
                     else:
                         tab2_emt.warning("不受支持的文件类型！")
-                        return
+                        tab2_emt.stop()
                 knowledge = KnowledgeService(faiss_path, faiss_index)
                 knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
             tab2_emt.success("✔️更新模型成功.")
+            st.toast("✔️更新模型成功.")
         else:
             tab2_emt.warning("请上传模型文件.")
 
