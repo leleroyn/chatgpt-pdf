@@ -107,7 +107,7 @@ def main():
             st.session_state["session_state_answer"].append(response)
 
     if st.session_state.user_question:
-        components.html("<script type=\"text/javascript\">window.parent.document.querySelectorAll('[role=\"tab\"]')["
+        components.html("<script type=\"text/javascript\">parent.document.querySelectorAll('[role=\"tab\"]')["
                         "0].click("
                         ")</script>")
 
