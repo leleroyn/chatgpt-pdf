@@ -7,6 +7,7 @@ import streamlit as st
 from dotenv import load_dotenv
 from service import *
 from service.ChatgptService import *
+import streamlit.components.v1 as components
 
 
 def main():
@@ -38,10 +39,10 @@ def main():
     upload_files = tab2.file_uploader("上传文件", type=["pdf", "docx", "txt"], accept_multiple_files=True,
                                       help="不要频繁的更新知识库,不要上传大文件.")
 
-    if tab2.button("更新模型↩️"):
+    if tab2.button("更新模型↩️", key="update_model"):
         tab2_emt = tab2.empty()
         # 提取文本
-        if upload_files is not None:
+        if len(upload_files) > 0:
             text = ""
             with st.spinner("正在更新模型..."):
                 for upload_file in upload_files:
@@ -69,7 +70,6 @@ def main():
                 knowledge = KnowledgeService(faiss_path, faiss_index)
                 knowledge.gen(text, os.getenv("SPLITTER_CHUCK_SIZE"), os.getenv("SPLITTER_CHUCK_OVER_LAP"))
             tab2_emt.success("✔️更新模型成功.")
-            st.toast("更新模型成功.", icon="✔️")
         else:
             tab2_emt.warning("请上传模型文件.", icon="⚠️")
             st.stop()
@@ -81,7 +81,7 @@ def main():
             st_odd_assistant = tab1.chat_message("assistant", avatar="🤖")
             st_odd_assistant.write(st.session_state["session_state_answer"][index])
 
-    user_question = st.chat_input("❓来向我提问吧：")
+    user_question = st.chat_input("❓来向我提问吧：",key="user_question")
     if user_question:
         st_user = tab1.chat_message("user", avatar="🧑")
         st_user.write(user_question)
@@ -105,6 +105,11 @@ def main():
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
             st.session_state["session_state_answer"].append(response)
+
+    if st.session_state.user_question:
+        components.html("<script type=\"text/javascript\">window.parent.document.querySelectorAll('[role=\"tab\"]')["
+                        "0].click("
+                        ")</script>")
 
 
 if __name__ == '__main__':
