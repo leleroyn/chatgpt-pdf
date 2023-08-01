@@ -41,14 +41,19 @@ def main():
         if kb_option == chatgpt_model:
             with st.chat_message("assistant", avatar="🤖"):
                 chatgpt_service = StreamChatgptService(chatgpt_model)
+                empty_container = st.empty()
+                empty_container.write("正在思考...")
                 response, source_documents, cb = chatgpt_service.query(user_question, st.session_state[
                                                                                           "session_state_question"][
                                                                                       -5:],
                                                                        st.session_state[
-                                                                           "session_state_answer"][-5:], st.empty())
+                                                                           "session_state_answer"][-5:],empty_container)
         else:
-            knowledge = KnowledgeService(faiss_path, faiss_index)
-            response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
+            with st.spinner("正在思考中..."):
+                knowledge = KnowledgeService(faiss_path, faiss_index)
+                response, source_documents, cb = knowledge.query(chatgpt_model, user_question)
+                chat_message_contain = st.chat_message("assistant", avatar="🤖")
+                chat_message_contain.write(response)
 
         if source_documents is not None and len(source_documents) > 0:
             st.info(source_documents)
