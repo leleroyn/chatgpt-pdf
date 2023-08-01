@@ -1,7 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
 from service import *
-from service.ChatgptService import *
 import streamlit.components.v1 as components
 
 
