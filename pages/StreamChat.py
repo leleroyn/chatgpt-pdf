@@ -47,7 +47,8 @@ def main():
                                                                                           "session_state_question"][
                                                                                       -5:],
                                                                        st.session_state[
-                                                                           "session_state_answer"][-5:],empty_container)
+                                                                           "session_state_answer"][-5:],
+                                                                       empty_container)
         else:
             with st.spinner("正在思考中..."):
                 knowledge = KnowledgeService(faiss_path, faiss_index)
@@ -61,11 +62,6 @@ def main():
         if response is not None and response.strip():
             st.session_state["session_state_question"].append(user_question)
             st.session_state["session_state_answer"].append(response)
-
-    if st.session_state.user_question:
-        components.html("<script type=\"text/javascript\">parent.document.querySelectorAll('[role=\"tab\"]')["
-                        "0].click("
-                        ")</script>")
 
 
 if __name__ == '__main__':
