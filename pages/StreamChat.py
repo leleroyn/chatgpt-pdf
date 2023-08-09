@@ -25,7 +25,7 @@ def main():
 
     st.subheader("🏡人工智能对话体验")
     kb_option_list = (chatgpt_model, "自定义模型")
-    kb_option = st.selectbox("指定知识库模型", kb_option_list)
+    st.selectbox("指定知识库模型", kb_option_list, key="kb_option")
 
     if len(st.session_state["session_state_question"]) > 0:
         for index in range(len(st.session_state["session_state_question"])):
@@ -38,7 +38,7 @@ def main():
     if user_question:
         st_user = st.chat_message("user", avatar="🧑")
         st_user.write(user_question)
-        if kb_option == chatgpt_model:
+        if st.session_state.kb_option == chatgpt_model:
             with st.chat_message("assistant", avatar="🤖"):
                 chatgpt_service = StreamChatgptService(chatgpt_model)
                 empty_container = st.empty()
