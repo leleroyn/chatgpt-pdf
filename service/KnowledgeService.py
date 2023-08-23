@@ -27,14 +27,21 @@ class KnowledgeService(object):
                                           index_name=self.index_name)
         llm = ChatOpenAI(model_name=model, temperature=0)
 
+        '''
         prompt_template = """
-        Use the following context to answer the user's question.
-        If you don't know the answer, say you don't know. Don't try to make it up! And answer in Chinese.
+        Use the following context to answer the user's question. Don't try to make it up!
+        If you don't know the answer, say you "我不知道.".  And answer always in Chinese.
         -----------
         {context}
         -----------
-        question: {question}
+        question: {question}        
         """
+        '''
+
+        prompt_template = """请注意：请谨慎评估Question与提示的Context信息的相关性，只根据本段输入文字信息的内容进行回答，如果Question与提供的材料无关，请回答"对不起，我不知道"，另外也不要回答无关答案：
+            Context: {context}
+            Question: {question}
+            Answer:"""
         prompt = PromptTemplate(
             template=prompt_template, input_variables=["context", "question"]
         )
