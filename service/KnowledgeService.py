@@ -1,3 +1,5 @@
+import os
+
 from langchain import FAISS, PromptTemplate
 from langchain.callbacks import get_openai_callback
 from langchain.chains import RetrievalQA
@@ -15,12 +17,12 @@ class KnowledgeService(object):
     def gen(self, text, chunk_size, chunk_overlap):
         # 文本分片
         docs = self.split_paragraph(text, int(chunk_size, 10), int(chunk_overlap, 10))
-        embeddings = HuggingFaceEmbeddings(model_name='shibing624/text2vec-base-chinese')
+        embeddings = HuggingFaceEmbeddings(model_name=os.getenv("TEXT2VEC_MODEL_NAME"))
         db = FAISS.from_documents(docs, embeddings)
         db.save_local(self.faiss_path, self.index_name)
 
     def query(self, model, user_question):
-        embeddings = HuggingFaceEmbeddings(model_name='shibing624/text2vec-base-chinese')
+        embeddings = HuggingFaceEmbeddings(model_name=os.getenv("TEXT2VEC_MODEL_NAME"))
         knowledge_base = FAISS.load_local(folder_path=self.faiss_path, embeddings=embeddings,
                                           index_name=self.index_name)
         llm = ChatOpenAI(model_name=model, temperature=0)
