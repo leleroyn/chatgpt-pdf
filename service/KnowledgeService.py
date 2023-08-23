@@ -2,7 +2,7 @@ from langchain import FAISS, PromptTemplate
 from langchain.callbacks import get_openai_callback
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings, HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -15,12 +15,13 @@ class KnowledgeService(object):
     def gen(self, text, chunk_size, chunk_overlap):
         # 文本分片
         docs = self.split_paragraph(text, int(chunk_size, 10), int(chunk_overlap, 10))
-        embeddings = OpenAIEmbeddings()
+        embeddings = HuggingFaceEmbeddings(model_name='shibing624/text2vec-base-chinese')
         db = FAISS.from_documents(docs, embeddings)
         db.save_local(self.faiss_path, self.index_name)
 
     def query(self, model, user_question):
-        knowledge_base = FAISS.load_local(folder_path=self.faiss_path, embeddings=OpenAIEmbeddings(),
+        embeddings = HuggingFaceEmbeddings(model_name='shibing624/text2vec-base-chinese')
+        knowledge_base = FAISS.load_local(folder_path=self.faiss_path, embeddings=embeddings,
                                           index_name=self.index_name)
         llm = ChatOpenAI(model_name=model, temperature=0)
 
