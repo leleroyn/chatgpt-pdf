@@ -8,7 +8,7 @@ def main():
         [
             # Page("pages/Chat.py", "智能对话体验", "🏠"),
             Page("pages/StreamChat.py", "智能对话体验", "🏠"),
-            Page("pages/UpdateModel.py", "更新知识库", ":books:")
+            Page("pages/UpdateModel.py", "更新知识库", "📚")
         ]
     )
 
