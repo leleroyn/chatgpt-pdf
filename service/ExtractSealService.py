@@ -20,8 +20,11 @@ class ExtractSealService(object):
 
     # 红章的提取出来生成图片（只能提取出黑白颜色底的红色印章）
     def pick_seal_image(self):
+
         arr = np.frombuffer(self.img_bits, dtype=np.uint8)
         image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
+        image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])), interpolation=cv2.IMREAD_COLOR)
         img_png = cv2.cvtColor(image.copy(), cv2.COLOR_RGB2RGBA)
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
         low_range = np.array([130, 43, 46])
@@ -80,6 +83,8 @@ class ExtractSealService(object):
             x, y, w, h = cv2.boundingRect(contours[max_ares[1]])
             temp = img5png[y:(y + h), x:(x + w)]
             print(temp.shape)
+            if temp.shape[0] < 100 or temp.shape[0] > 300 :
+                continue
             if temp.shape[0] < temp.shape[1]:
                 zh = int((temp.shape[1] - temp.shape[0]) / 2)
                 temp = cv2.copyMakeBorder(temp, zh, zh, 0, 0, cv2.BORDER_CONSTANT, value=[255, 255, 255, 0])
