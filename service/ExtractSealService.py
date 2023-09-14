@@ -23,30 +23,27 @@ class ExtractSealService(object):
 
         arr = np.frombuffer(self.img_bits, dtype=np.uint8)
         image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        img_w = 1024 if image.shape[1] > 1000 else image.shape[1]
+        img_w = 768 if image.shape[1] > 768 else image.shape[1]
         image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])), interpolation=cv2.IMREAD_COLOR)
         img_png = cv2.cvtColor(image.copy(), cv2.COLOR_RGB2RGBA)
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
-        low_range = np.array([130, 43, 46])
-        high_range = np.array([180, 255, 255])
-        th = cv2.inRange(hue_image, low_range, high_range)
-        element = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
-        th = cv2.dilate(th, element)
-        index1 = th == 255
-        img1 = np.zeros(img_png.shape, np.uint8)
-        img1[:, :, :] = (255, 255, 255, 0)
-        img1[index1] = img_png[index1]  # (0,0,255)
 
-        low_range = np.array([0, 43, 46])
-        high_range = np.array([9, 255, 255])
-        th = cv2.inRange(hue_image, low_range, high_range)
-        element = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
-        th = cv2.dilate(th, element)
-        index1 = th == 255
-        img2 = np.zeros(img_png.shape, np.uint8)
-        img2[:, :, :] = (255, 255, 255, 0)
-        img2[index1] = img_png[index1]
-        img_real = cv2.add(img2, img1)
+        img_real = None
+        trace_img_ranges = [[np.array([130, 43, 46]), np.array([180, 255, 255])]
+            , [np.array([6, 36, 244]), np.array([9, 255, 255])]]
+        for img_range in trace_img_ranges:
+            th = cv2.inRange(hue_image, img_range[0], img_range[1])
+            element = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
+            th = cv2.dilate(th, element)
+            index1 = th == 255
+            img = np.zeros(img_png.shape, np.uint8)
+            img[:, :, :] = (255, 255, 255, 0)
+            img[index1] = img_png[index1]
+            if img_real is None:
+                img_real = img
+            else:
+                img_real = cv2.add(img_real, img)
+
         white_px = np.asarray([255, 255, 255, 255])
         (row, col, _) = img_real.shape
         for r in range(row):
@@ -77,13 +74,13 @@ class ExtractSealService(object):
         areas = sorted(areas, reverse=True)
         print(areas)
         stamps = []
-        for item in areas:
+        for item in areas[:5]:
             max_ares = item
             print(item)
             x, y, w, h = cv2.boundingRect(contours[max_ares[1]])
             temp = img5png[y:(y + h), x:(x + w)]
             print(temp.shape)
-            if temp.shape[0] < 100 or temp.shape[0] > 300 :
+            if temp.shape[0] < 100 or temp.shape[0] > 300:
                 continue
             if temp.shape[0] < temp.shape[1]:
                 zh = int((temp.shape[1] - temp.shape[0]) / 2)
