@@ -66,7 +66,6 @@ class ExtractSealService(object):
         contours, hierarchy = cv2.findContours(c_canny_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         areas = []
         for i, cnt in enumerate(contours):
-            rect = cv2.minAreaRect(cnt)
             x, y, w, h = cv2.boundingRect(cnt)
             area = w * h
             ars = [area, i]
@@ -74,14 +73,12 @@ class ExtractSealService(object):
         areas = sorted(areas, reverse=True)
         print(areas)
         stamps = []
-        for item in areas[:5]:
+        for item in areas[:4]:
             max_ares = item
             print(item)
             x, y, w, h = cv2.boundingRect(contours[max_ares[1]])
             temp = img5png[y:(y + h), x:(x + w)]
             print(temp.shape)
-            if temp.shape[0] < 100 or temp.shape[0] > 300:
-                continue
             if temp.shape[0] < temp.shape[1]:
                 zh = int((temp.shape[1] - temp.shape[0]) / 2)
                 temp = cv2.copyMakeBorder(temp, zh, zh, 0, 0, cv2.BORDER_CONSTANT, value=[255, 255, 255, 0])
