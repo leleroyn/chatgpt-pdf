@@ -23,7 +23,7 @@ class ExtractSealService(object):
 
         arr = np.frombuffer(self.img_bits, dtype=np.uint8)
         image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
+        img_w = 1024 if image.shape[1] > 1000 else image.shape[1]
         image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])), interpolation=cv2.IMREAD_COLOR)
         img_png = cv2.cvtColor(image.copy(), cv2.COLOR_RGB2RGBA)
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
@@ -59,7 +59,7 @@ class ExtractSealService(object):
         img4png = cv2.copyMakeBorder(img_real, 50, 50, 50, 50, cv2.BORDER_CONSTANT, value=[255, 255, 255, 0])
         img5png = cv2.copyMakeBorder(image, 50, 50, 50, 50, cv2.BORDER_CONSTANT, value=[255, 255, 255, 0])
         img2gray = cv2.cvtColor(img4png, cv2.COLOR_RGBA2GRAY)
-        retval, gray_first = cv2.threshold(img2gray, 254, 255, cv2.THRESH_BINARY_INV)
+        retval, gray_first = cv2.threshold(img2gray, 253, 255, cv2.THRESH_BINARY_INV)
 
         element = cv2.getStructuringElement(cv2.MORPH_RECT, (22, 22))
         img6 = cv2.dilate(gray_first, element)
