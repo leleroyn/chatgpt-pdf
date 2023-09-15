@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from PIL import Image
 
 
 class ExtractSealService(object):
@@ -14,7 +15,7 @@ class ExtractSealService(object):
             new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
         elif new_image.shape[2] == 4:
             new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
-        return new_image
+        return Image.fromarray(new_image)
 
     def pick_seal_image(self):
         """
@@ -23,7 +24,8 @@ class ExtractSealService(object):
         arr = np.frombuffer(self.img_bits, dtype=np.uint8)
         image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
         img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
-        image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])), interpolation=cv2.IMREAD_COLOR)
+        image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])),
+                           interpolation=cv2.INTER_AREA if img_w > 1024 else cv2.INTER_CUBIC)
         img_png = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
 
@@ -88,7 +90,7 @@ class ExtractSealService(object):
             else:
                 zh = int((temp.shape[0] - temp.shape[1]) / 2)
                 temp = cv2.copyMakeBorder(temp, 0, 0, zh, zh, cv2.BORDER_CONSTANT, value=[255, 255, 255, 0])
-            dst = cv2.resize(temp, (300, 300))
+            dst = cv2.resize(temp, (300, 300), interpolation=cv2.INTER_AREA if x > 300 or y > 300 else cv2.INTER_CUBIC)
             stamps.append(dst)
         all_stamp = cv2.hconcat(stamps)
         return self.toRGB(cnt_img), None if all_stamp is None else self.toRGB(all_stamp)
