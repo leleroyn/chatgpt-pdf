@@ -1,13 +1,12 @@
 import cv2
 import numpy as np
-from PIL import Image
 
 
 class ExtractSealService(object):
     def __init__(self, img_bits):
         self.img_bits = img_bits
 
-    def cv2pil(self,image):
+    def toRGB(self, image):
         new_image = image.copy()
         if new_image.ndim == 2:
             pass
@@ -15,7 +14,6 @@ class ExtractSealService(object):
             new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
         elif new_image.shape[2] == 4:
             new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
-        new_image = Image.fromarray(new_image)
         return new_image
 
     def pick_seal_image(self):
@@ -68,7 +66,7 @@ class ExtractSealService(object):
         c_canny_img = cv2.Canny(img_real, 10, 10)
 
         contours, hierarchy = cv2.findContours(c_canny_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        cnt_img = cv2.drawContours(img5png.copy(),contours,-1,(0,255,0),5)
+        cnt_img = cv2.drawContours(img5png.copy(), contours, -1, (0, 255, 0), 5)
         areas = []
         for i, cnt in enumerate(contours):
             x, y, w, h = cv2.boundingRect(cnt)
@@ -93,4 +91,4 @@ class ExtractSealService(object):
             dst = cv2.resize(temp, (300, 300))
             stamps.append(dst)
         all_stamp = cv2.hconcat(stamps)
-        return self.cv2pil(cnt_img),self.cv2pil(all_stamp)
+        return self.toRGB(cnt_img), None if all_stamp is None else self.toRGB(all_stamp)

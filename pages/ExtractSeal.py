@@ -21,13 +21,16 @@ def main():
         with columns[0]:
             st.image(cnt_img)
         with columns[1]:
-            st.image(extr_img)
-            byte_stream = io.BytesIO()
-            # 将图像保存到字节流对象中
-            extr_img.save(byte_stream, format='JPEG')
-            # 获取字节数据
-            byte_data = byte_stream.getvalue()
-            st.download_button("下载", byte_data,file_name=uploaded_file.name)
+            if extr_img is None:
+                st.warning("没有识别到红色区域!")
+            else:
+                st.image(extr_img)
+                byte_stream = io.BytesIO()
+                # 将图像保存到字节流对象中
+                extr_img.save(byte_stream, format='JPEG')
+                # 获取字节数据
+                byte_data = byte_stream.getvalue()
+                st.download_button("下载", byte_data,file_name=uploaded_file.name)
 
 
 if __name__ == '__main__':
