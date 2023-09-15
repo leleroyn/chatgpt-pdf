@@ -18,19 +18,20 @@ class ExtractSealService(object):
         new_image = Image.fromarray(new_image)
         return new_image
 
-    # 红章的提取出来生成图片（只能提取出黑白颜色底的红色印章）
     def pick_seal_image(self):
-
+        """
+        红章的提取出来生成图片（只能提取出黑白颜色底的红色印章）
+        """
         arr = np.frombuffer(self.img_bits, dtype=np.uint8)
         image = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        img_w = 768 if image.shape[1] > 768 else image.shape[1]
+        img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
         image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])), interpolation=cv2.IMREAD_COLOR)
-        img_png = cv2.cvtColor(image.copy(), cv2.COLOR_RGB2RGBA)
+        img_png = cv2.cvtColor(image, cv2.COLOR_RGB2RGBA)
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
 
         img_real = None
-        mask_ranges = [[np.array([130, 43, 46]), np.array([180, 255, 255])]
-            , [np.array([6, 36, 244]), np.array([9, 255, 255])]]
+        mask_ranges = [[np.array([0, 43, 46]), np.array([10, 255, 255])]
+            , [np.array([156, 43, 46]), np.array([180, 255, 255])]]
         for img_range in mask_ranges:
             th = cv2.inRange(hue_image, img_range[0], img_range[1])
             element = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
@@ -58,12 +59,16 @@ class ExtractSealService(object):
         img2gray = cv2.cvtColor(img4png, cv2.COLOR_RGBA2GRAY)
         retval, gray_first = cv2.threshold(img2gray, 253, 255, cv2.THRESH_BINARY_INV)
 
-        element = cv2.getStructuringElement(cv2.MORPH_RECT, (22, 22))
-        img6 = cv2.dilate(gray_first, element)
+        # 形态学去噪，cv2.MORPH_OPEN先腐蚀再膨胀，cv2.MORPH_CLOSE先膨胀再腐蚀
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        img_real = cv2.morphologyEx(gray_first, cv2.MORPH_OPEN, kernel, iterations=1)
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (100, 100))
+        img_real = cv2.morphologyEx(img_real, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-        c_canny_img = cv2.Canny(img6, 10, 10)
+        c_canny_img = cv2.Canny(img_real, 10, 10)
 
         contours, hierarchy = cv2.findContours(c_canny_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cnt_img = cv2.drawContours(img5png.copy(),contours,-1,(0,255,0),5)
         areas = []
         for i, cnt in enumerate(contours):
             x, y, w, h = cv2.boundingRect(cnt)
@@ -88,4 +93,4 @@ class ExtractSealService(object):
             dst = cv2.resize(temp, (300, 300))
             stamps.append(dst)
         all_stamp = cv2.hconcat(stamps)
-        return self.cv2pil(all_stamp)
+        return self.cv2pil(cnt_img),self.cv2pil(all_stamp)

@@ -16,15 +16,15 @@ def main():
     uploaded_file = st.file_uploader("上传文件", type=["png", "jpg", "bmp"])
     columns = st.columns(2)
     if uploaded_file is not None:
+        extract_seal = ExtractSealService(uploaded_file.getbuffer())
+        cnt_img, extr_img = extract_seal.pick_seal_image()
         with columns[0]:
-            st.image(uploaded_file)
+            st.image(cnt_img)
         with columns[1]:
-            extract_seal = ExtractSealService(uploaded_file.getbuffer())
-            pil_img = extract_seal.pick_seal_image()
-            st.image(pil_img)
+            st.image(extr_img)
             byte_stream = io.BytesIO()
             # 将图像保存到字节流对象中
-            pil_img.save(byte_stream, format='JPEG')
+            extr_img.save(byte_stream, format='JPEG')
             # 获取字节数据
             byte_data = byte_stream.getvalue()
             st.download_button("下载", byte_data,file_name=uploaded_file.name)
