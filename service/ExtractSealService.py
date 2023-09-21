@@ -30,8 +30,8 @@ class ExtractSealService(object):
         hue_image = cv2.cvtColor(img_png, cv2.COLOR_BGR2HSV)
 
         img_real = None
-        mask_ranges = [[np.array([0, 43, 46]), np.array([10, 255, 255])]
-            , [np.array([156, 43, 46]), np.array([180, 255, 255])]]
+        mask_ranges = [[np.array([0, 100, 46]), np.array([10, 255, 255])]
+            , [np.array([156, 100, 46]), np.array([180, 255, 255])]]
         for img_range in mask_ranges:
             th = cv2.inRange(hue_image, img_range[0], img_range[1])
             element = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
