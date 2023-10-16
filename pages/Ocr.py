@@ -11,9 +11,9 @@ def main():
         with columns[0]:
             st.image(uploaded_file)
         with columns[1]:
-            with st.spinner("Pleade waiting..."):
+            with st.spinner("Please waiting..."):
                 ocr = OcrService()
-                res = ocr.ocr(uploaded_file.getbuffer())
+                res = ocr.ocr(uploaded_file)
                 st.write(res)
 
 
