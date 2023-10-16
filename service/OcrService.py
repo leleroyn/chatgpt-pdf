@@ -25,7 +25,7 @@ class OcrService:
     def __init__(self):
         self.rapid_ocr = RapidOCR()
 
-    def ocr(self, image_path):
+    def detect(self, image_path):
         image = Image.open(image_path).convert('RGB')
         image = rotate_image_by_exif(image)
         image = pil2cv(image)
@@ -35,11 +35,12 @@ class OcrService:
         B_channel, G_channel, R_channel = cv2.split(image)
         res, elapse = self.rapid_ocr(R_channel)
         result = []
-        for i in range(len(res)):
-            item = []
-            value = res[i]
-            item.append(value[1])
-            item.append(value[2])
-            result.append(item)
+        if res is not None:
+            for i in range(len(res)):
+                item = []
+                value = res[i]
+                item.append(value[1])
+                item.append(value[2])
+                result.append(item)
 
         return result

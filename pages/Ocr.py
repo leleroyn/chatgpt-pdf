@@ -13,7 +13,7 @@ def main():
         with columns[1]:
             with st.spinner("Please waiting..."):
                 ocr = OcrService()
-                res = ocr.ocr(uploaded_file)
+                res = ocr.detect(uploaded_file)
                 st.write(res)
 
 
