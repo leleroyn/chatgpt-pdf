@@ -37,10 +37,6 @@ class OcrService:
         result = []
         if res is not None:
             for i in range(len(res)):
-                item = []
-                value = res[i]
-                item.append(value[1])
-                item.append(value[2])
-                result.append(item)
+                result.append(res[i][1])
 
         return result
