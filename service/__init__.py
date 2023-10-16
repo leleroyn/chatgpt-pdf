@@ -3,3 +3,4 @@ from service.ChatgptService import ChatgptService
 from service.StreamingLLMCallbackHandler import StreamingLLMCallbackHandler
 from service.StreamChatService import StreamChatgptService
 from service.ExtractSealService import ExtractSealService
+from service.OcrService import OcrService
