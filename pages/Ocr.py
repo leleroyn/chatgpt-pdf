@@ -1,3 +1,4 @@
+from time import time
 import streamlit as st
 from service import *
 
@@ -12,9 +13,14 @@ def main():
             st.image(uploaded_file)
         with columns[1]:
             with st.spinner("Please waiting..."):
+                start = time()
                 ocr = OcrService()
                 res = ocr.detect(uploaded_file)
-                st.write(res)
+                end = time()
+                elapsed = end - start
+                st.info("识别完成，共花费 {} seconds".format(elapsed))
+                for v in res:
+                    st.write(v)
 
 
 if __name__ == '__main__':
