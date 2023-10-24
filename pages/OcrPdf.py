@@ -5,7 +5,7 @@ from service import *
 
 def main():
     st.set_page_config(page_title="PDF文字提取", layout="wide", menu_items={})
-    st.subheader("🔍PDF文字提取")
+    st.subheader("👓PDF文字提取")
     uploaded_file = st.file_uploader("上传PDF文件", type=["pdf"])
     if uploaded_file is not None:
         with st.spinner("Please waiting..."):
