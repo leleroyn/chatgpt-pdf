@@ -25,6 +25,5 @@ def main():
                     for txt in value[1]:
                         st.caption(txt)
 
-
 if __name__ == '__main__':
     main()
