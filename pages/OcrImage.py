@@ -15,7 +15,7 @@ def main():
             with st.spinner("Please waiting..."):
                 start = time()
                 ocr = OcrService()
-                res = ocr.detect(uploaded_file)
+                res = ocr.detect_from_image_path(uploaded_file)
                 end = time()
                 elapsed = end - start
                 st.info("识别完成，共花费 {} seconds".format(elapsed))

@@ -1,7 +1,9 @@
+from io import BytesIO
+
 import cv2
 import numpy as np
 from PIL import ImageOps, Image
-
+import fitz
 from rapidocr_onnxruntime import RapidOCR
 
 
@@ -25,8 +27,13 @@ class OcrService:
     def __init__(self):
         self.rapid_ocr = RapidOCR()
 
-    def detect(self, image_path):
-        image = Image.open(image_path).convert('RGB')
+    def detect_from_image_path(self, image_path):
+        image = Image.open(image_path)
+        result = self.detect_from_image(image)
+        return result
+
+    def detect_from_image(self, image):
+        image = image.convert('RGB')
         image = rotate_image_by_exif(image)
         image = pil2cv(image)
         img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
@@ -38,5 +45,21 @@ class OcrService:
         if res is not None:
             for i in range(len(res)):
                 result.append(res[i][1])
-
         return result
+
+    def detect_from_pdf_path(self, pdf_bits):
+        pdf_text = {}
+        pdf_doc = fitz.open("pdf", pdf_bits)
+        pages = pdf_doc.pages()
+        i = 0
+        for page in pages:
+            zoom_x = 1.33333333
+            zoom_y = 1.33333333
+            mat = fitz.Matrix(zoom_x, zoom_y)
+            pix = page.get_pixmap(matrix=mat, dpi=None, colorspace='rgb', alpha=False)
+            img_bits = pix.tobytes()
+            img = Image.open(BytesIO(img_bits))
+            result = self.detect_from_image(img)
+            pdf_text[i] = (img, result)
+            i = i + 1
+        return pdf_text
