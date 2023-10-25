@@ -3,19 +3,19 @@ import numpy as np
 from PIL import Image
 
 
+def toRGB(image):
+    new_image = image.copy()
+    if new_image.ndim == 2:
+        pass
+    elif new_image.shape[2] == 3:
+        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
+    elif new_image.shape[2] == 4:
+        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
+    return Image.fromarray(new_image)
+
 class ExtractSealService(object):
     def __init__(self, img_bits):
         self.img_bits = img_bits
-
-    def toRGB(self, image):
-        new_image = image.copy()
-        if new_image.ndim == 2:
-            pass
-        elif new_image.shape[2] == 3:
-            new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2RGB)
-        elif new_image.shape[2] == 4:
-            new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
-        return Image.fromarray(new_image)
 
     def pick_seal_image(self):
         """
@@ -93,4 +93,4 @@ class ExtractSealService(object):
             dst = cv2.resize(temp, (300, 300), interpolation=cv2.INTER_AREA if x > 300 or y > 300 else cv2.INTER_CUBIC)
             stamps.append(dst)
         all_stamp = cv2.hconcat(stamps)
-        return self.toRGB(cnt_img), None if all_stamp is None else self.toRGB(all_stamp)
+        return toRGB(cnt_img), None if all_stamp is None else toRGB(all_stamp)

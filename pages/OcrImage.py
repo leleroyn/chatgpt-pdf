@@ -1,5 +1,8 @@
 from time import time
+
 import streamlit as st
+from PIL import Image
+
 from service import *
 
 
@@ -10,7 +13,9 @@ def main():
     columns = st.columns(2)
     if uploaded_file is not None:
         with columns[0]:
-            st.image(uploaded_file)
+            image = Image.open(uploaded_file)
+            image = orientation(pil2cv(image))
+            st.image(toRGB(image))
         with columns[1]:
             with st.spinner("Please waiting..."):
                 start = time()
