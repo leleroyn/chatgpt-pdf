@@ -11,7 +11,8 @@ def main():
             Page("pages/UpdateModel.py", "更新知识库", "📚"),
             Page("pages/ExtractSeal.py", "提取图片中的印章", "📕"),
             Page("pages/OcrImage.py", "图片文字提取", "🔍"),
-            Page("pages/OcrPdf.py", "PDF文字提取", "👓")
+            Page("pages/OcrPdf.py", "PDF文字提取", "👓"),
+            Page("pages/UploadFileToDfs.py", "上传文件到DFS服务器", "📤")
         ]
     )
 

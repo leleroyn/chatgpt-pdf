@@ -13,6 +13,7 @@ def toRGB(image):
         new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
     return Image.fromarray(new_image)
 
+
 class ExtractSealService(object):
     def __init__(self, img_bits):
         self.img_bits = img_bits
