@@ -3,7 +3,7 @@ from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import ChatMessage
 
-from service import StreamingLLMCallbackHandler
+from service.StreamingLLMCallbackHandler import StreamingLLMCallbackHandler
 
 
 class StreamChatgptService:
