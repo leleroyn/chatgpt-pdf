@@ -10,8 +10,8 @@ def main():
     st.set_page_config(page_title="PDF压缩", layout="wide", menu_items={})
     st.subheader("⚡PDF压缩")
 
+    compress_size = st.slider('压缩到大小(单位M)', min_value=1, max_value=20, step=1, value=10)
     uploaded_file = st.file_uploader("上传PDF文件", type=["pdf"])
-    compress_size = st.number_input('压缩到大小(单位M)', min_value=1, max_value=20, step=1, value=10)
     if uploaded_file is not None:
         if compress_size is not None:
             with st.spinner("Please waiting..."):
