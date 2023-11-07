@@ -35,7 +35,7 @@ def main():
                 end = time()
                 elapsed = end - start
                 b64 = base64.b64encode(pdf_bits).decode('UTF-8')  # 解码并加密为base64
-                href = f'<a href="data:file/data;base64,{b64}" download="{uploaded_file.name}">下载压缩好的文件</a>'
+                href = f'<a href="data:file/data;base64,{b64}" download="{uploaded_file.name}">下载压缩好的文件({round(len(pdf_bits)/1024/1024,2)}M)</a>'
                 st.markdown(href, unsafe_allow_html=True)
                 st.info("压缩完成，共花费 {} 秒".format(elapsed))
 
