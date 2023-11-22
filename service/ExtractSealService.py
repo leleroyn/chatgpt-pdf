@@ -83,6 +83,10 @@ class ExtractSealService(object):
             max_ares = item
             print(item)
             x, y, w, h = cv2.boundingRect(contours[max_ares[1]])
+            x = x - 10
+            y = y - 10
+            w = w + 20
+            h = h + 20
             temp = img5png[y:(y + h), x:(x + w)]
             print(temp.shape)
             if temp.shape[0] < temp.shape[1]:
