@@ -75,9 +75,9 @@ class OcrService:
         image = image.convert('RGB')
         # image = rotate_image_by_exif(image)
         image = pil2cv(image)
-        img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
-        image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])),
-                           interpolation=cv2.INTER_AREA)
+        # img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
+        # image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])),
+        #                   interpolation=cv2.INTER_AREA)
         image = orientation(image)
         B_channel, G_channel, R_channel = cv2.split(image)
         res, elapse = self.rapid_ocr(R_channel)
