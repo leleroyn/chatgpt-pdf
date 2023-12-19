@@ -79,8 +79,7 @@ class OcrService:
         # image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])),
         #                   interpolation=cv2.INTER_AREA)
         image = orientation(image)
-        B_channel, G_channel, R_channel = cv2.split(image)
-        res, elapse = self.rapid_ocr(R_channel)
+        res, elapse = self.rapid_ocr(image)
         result = []
         if res is not None:
             for i in range(len(res)):
