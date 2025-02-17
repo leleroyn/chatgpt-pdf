@@ -37,7 +37,7 @@ def main():
                     resJson = json.loads(res.text)
                     st.write(resJson["choices"][0]["message"]["content"])
                 else:
-                    st.warning("提取异常.(可能上传的图片不是身份证)")
+                    st.warning("提取异常.(服务不可用)")
 
 
 if __name__ == '__main__':
