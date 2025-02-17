@@ -33,6 +33,9 @@ def pdf_to_pic(pdf, ratio=50):
         img_bits = pm.tobytes()
         np_array = np.frombuffer(img_bits, np.uint8)
         image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        resize_w = 1024 if image.shape[1] > 1024 else image.shape[1]
+        dsize = (resize_w, int(resize_w * image.shape[0] / image.shape[1]))
+        image = cv2.resize(image, dsize=dsize, fx=1, fy=1, interpolation=cv2.INTER_LINEAR)
         params = [cv2.IMWRITE_JPEG_QUALITY, ratio]  # ratio:0~100
         image = cv2.imencode(".jpg", image, params)[1]
         image = (np.array(image)).tobytes()

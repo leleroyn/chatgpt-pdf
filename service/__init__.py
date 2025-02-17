@@ -5,3 +5,4 @@ from service.OcrService import OcrService, orientation, pil2cv
 from service.StreamChatService import StreamChatgptService
 from service.StreamingLLMCallbackHandler import StreamingLLMCallbackHandler
 from service.PdfService import *
+from service.DeepSeekHuaweiService import *
