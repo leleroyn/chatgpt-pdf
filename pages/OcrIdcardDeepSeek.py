@@ -30,6 +30,7 @@ def main():
                 for v in textLines:
                     text = text + v + "\n"
                 res = deepSeekHuaweiService.ocr_idcard_deepseek(text)
+
                 end = time()
                 elapsed2 = end - start
                 st.info("提取完成，OCR花费:{}s,AI提取花费:{} s".format(elapsed1, elapsed2))
