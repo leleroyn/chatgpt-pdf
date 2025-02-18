@@ -25,19 +25,15 @@ def main():
                 elapsed1 = end - start
 
                 start = time()
-                deepSeekHuaweiService = DeepSeekHuaweiService("DeepSeek-V3")
+                oneApiService = OneApiService("DeepSeek-V3")
                 text = ""
                 for v in textLines:
                     text = text + v + "\n"
-                res = deepSeekHuaweiService.ocr_business_deepseek(text)
+                res = oneApiService.ocr_business_deepseek(text)
                 end = time()
                 elapsed2 = end - start
                 st.info("提取完成，OCR花费:{}s,AI提取花费:{} s".format(elapsed1, elapsed2))
-                if res.status_code == 200 and res.text != "":
-                    resJson = json.loads(res.text)
-                    st.write(resJson["choices"][0]["message"]["content"])
-                else:
-                    st.warning("提取异常.(服务不可用)")
+                st.write(res)
 
 
 if __name__ == '__main__':
