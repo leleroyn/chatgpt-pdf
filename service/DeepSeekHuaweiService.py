@@ -1,5 +1,7 @@
-import requests
 import json
+
+import requests
+
 
 class DeepSeekHuaweiService:
     def __init__(self, model_name):

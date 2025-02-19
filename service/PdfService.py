@@ -1,6 +1,4 @@
 # coding:utf-8
-import tempfile
-from io import BytesIO
 
 import cv2
 import fitz
