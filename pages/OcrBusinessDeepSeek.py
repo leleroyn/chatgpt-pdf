@@ -32,7 +32,7 @@ def main():
                 try:
                     res = oneApiService.ocr_business_deepseek(text)
                 except Exception as r:
-                    st.warning('未知错误 %s' % (r))
+                    st.warning('未知错误 %s' % r)
                 else:
                     end = time()
                     elapsed2 = end - start
