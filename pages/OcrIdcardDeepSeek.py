@@ -29,12 +29,15 @@ def main():
                 text = ""
                 for v in textLines:
                     text = text + v + "\n"
-                res = oneApiService.ocr_idcard_deepseek(text)
-
-                end = time()
-                elapsed2 = end - start
-                st.info("提取完成，OCR花费:{}s,AI提取花费:{} s".format(elapsed1, elapsed2))
-                st.write(res)
+                try:
+                    res = oneApiService.ocr_idcard_deepseek(text)
+                except Exception as r:
+                    st.warning('未知错误 %s' %(r))
+                else:
+                    end = time()
+                    elapsed2 = end - start
+                    st.info("提取完成，OCR花费:{}s,AI提取花费:{} s".format(elapsed1, elapsed2))
+                    st.code(res,language="json",wrap_lines=True)
 
 
 if __name__ == '__main__':
