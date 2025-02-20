@@ -9,23 +9,23 @@ class OneApiService:
         )
 
     def  ocr_idcard_deepseek(self,question):
-
-
-        prompt = """
-        以下内容可能来源于一张中国大陆的身份证图片的OCR处理文本，请先整理文件内容，然后判断是否是身份证，
-        如果是返回json：{"code":200,"name":"姓名","sex":"性别","nation":"民族","birthday":"出生日期","address":"居住地址","issue":"签发机构(若无返回空)","expireDate":"证件有效期(若无返回空)"}， 
-        如果不是返回json：{"code":500,"message":"原因"}，请不要返回任何多余的内容！
-        待处理内容如下：\n          
-        """
-
-        content= prompt + question
-        print(content)
+        prompt = f'''
+        # 以下内容可能来源于一张中国大陆的身份证图片的OCR处理文本:
+        {question}
+        # 你要处理的问题：
+        - 请先整理文件内容，然后判断是否是身份证，
+        - 如果是返回json：{{"code":200,"name":"姓名","sex":"性别","nation":"民族","birthday":"出生日期","address":"居住地址","issue":"签发机构(若无返回空)","expireDate":"证件有效期(若无返回空)"}}。
+        - 如果不是返回json：{{"code":500,"message":"原因"}}。
+        # 在回答时，请注意以下几点：       
+        - 切记不要返回任何多余的内容！
+        - 结果一定要用json返回，不需要makedown样式 。               
+        '''
+        print(prompt)
 
         chat_completion = self.client.chat.completions.create(
             model=self.model_name,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": content}
+                {"role": "user", "content": prompt}
             ],
         )
         print(chat_completion)
@@ -33,21 +33,24 @@ class OneApiService:
 
 
     def  ocr_business_deepseek(self,question):
-        prompt = """
-        以下内容可能来源于一张中国大陆的企业营业执照图片的OCR处理文本，请先整理文件内容，然后判断是否是营业执照，
-        如果是返回json：{"code":200,"name":"企业名称","orgCode":"统一社会信用代码","businessType":"企业类型","person":"法定代表人","address":"住所","capital":"注册金额(单位：万元)","createDate":"成立日期","period":"营业期限(若无返回空)","business":"经营范围"} ，
-        如果不是返回json：{"code":500,"message":"原因"}，请不要返回任何多余的内容！
-        待处理内容如下：\n          
-        """
+        prompt = f'''
+        # 以下内容可能来源于一张中国大陆的企业营业执照图片的OCR处理文本:
+        {question}
+        # 你要处理的问题：
+        - 请先整理文件内容，然后判断是否是营业执照。
+        - 如果是返回json：{{"code":200,"name":"企业名称","orgCode":"统一社会信用代码","businessType":"企业类型","person":"法定代表人","address":"住所","capital":"注册金额(单位：万元)","createDate":"成立日期","period":"营业期限(若无返回空)","business":"经营范围"}}。
+        - 如果不是返回json：{{"code":500,"message":"原因"}}。
+        # 在回答时，请注意以下几点：        
+        - 切记不要返回任何多余的内容！
+        - 结果一定要用json返回，不需要makedown样式 。       
+        '''
 
-        content= prompt + question
-        print(content)
+        print(prompt)
 
         chat_completion = self.client.chat.completions.create(
             model=self.model_name,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": content}
+                {"role": "user", "content": prompt}
             ],
         )
         print(chat_completion)
