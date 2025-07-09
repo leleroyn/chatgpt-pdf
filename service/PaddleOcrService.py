@@ -53,6 +53,7 @@ class PaddleOcrService:
         result = np.where(black_mask[..., None], convolved, arr)
         return Image.fromarray(result.astype('uint8'))
 
+
     def ocr_seal(self, image_bytes):
         import base64
         import requests
