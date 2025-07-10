@@ -53,7 +53,6 @@ class PaddleOcrService:
         result = np.where(black_mask[..., None], convolved, arr)
         return Image.fromarray(result.astype('uint8'))
 
-
     def ocr_seal(self, image_bytes):
         import base64
         import requests
@@ -70,15 +69,15 @@ class PaddleOcrService:
         try:
             # 导航到目标路径: result -> sealRecResults -> [0] -> prunedResult -> seal_res_list -> [0]
             seal_res_list = result["sealRecResults"][0]["prunedResult"]["seal_res_list"]
-
+            all_rec = []
             if seal_res_list:  # 确保列表不为空
-                target_data = seal_res_list[0]
-                rec_texts = target_data["rec_texts"]
-                rec_scores = target_data["rec_scores"]
-
-                print("rec_texts:", rec_texts)
-                print("rec_scores:", rec_scores)
-                return rec_texts, rec_scores
+                for seal_data in seal_res_list:
+                    rec_texts = seal_data["rec_texts"]
+                    rec_scores = seal_data["rec_scores"]
+                    print("rec_texts:", rec_texts)
+                    print("rec_scores:", rec_scores)
+                    all_rec.append((rec_texts, rec_scores))
+                return all_rec
             else:
                 print("seal_res_list为空")
                 return "没有找到印章"

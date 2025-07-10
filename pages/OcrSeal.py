@@ -33,7 +33,7 @@ def main():
             # 获取字节数据
             byte_data = byte_stream.getvalue()
             result = paddle_ocr.ocr_seal(byte_data)
-            st.code(result, language="json")
+            st.write(result)
             st.download_button("下载", byte_data, file_name=uploaded_file.name)
 
 
