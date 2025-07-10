@@ -8,17 +8,18 @@ class OneApiService:
             base_url="http://192.168.2.228:3000/v1"
         )
 
-    def  ocr_idcard_deepseek(self,question):
+    def  ocr_idcard_llm(self, question):
         prompt = f'''
         # 以下内容可能来源于一张中国大陆的身份证图片的OCR处理文本:
         {question}
         # 你要处理的问题：
         - 请先整理文件内容，然后判断是否是身份证，
-        - 如果是返回json：{{"code":200,"name":"姓名","sex":"性别","nation":"民族","birthday":"出生日期","address":"居住地址","issue":"签发机构(若无返回空)","expireDate":"证件有效期(若无返回空)"}}。
+        - 如果是返回json：{{"code":200,"name":"姓名","sex":"性别","nation":"民族","birthday":"出生日期","no":"公民身份号码","address":"居住地址","issue":"签发机构(若无返回空)","expireDate":"证件有效期(若无返回空)"}}。
         - 如果不是返回json：{{"code":500,"message":"原因"}}。
         # 在回答时，请注意以下几点：       
         - 切记不要返回任何多余的内容！
-        - 结果一定要用json返回，不需要makedown样式 。               
+        - 结果一定要用json返回，不需要makedown样式 。
+        <no_think>
         '''
         print(prompt)
 
@@ -32,7 +33,7 @@ class OneApiService:
         return chat_completion.choices[0].message.content
 
 
-    def  ocr_business_deepseek(self,question):
+    def  ocr_business_llm(self, question):
         prompt = f'''
         # 以下内容可能来源于一张中国大陆的企业营业执照图片的OCR处理文本:
         {question}
@@ -42,7 +43,8 @@ class OneApiService:
         - 如果不是返回json：{{"code":500,"message":"原因"}}。
         # 在回答时，请注意以下几点：        
         - 切记不要返回任何多余的内容！
-        - 结果一定要用json返回，不需要makedown样式 。       
+        - 结果一定要用json返回，不需要makedown样式 。
+         <no_think>            
         '''
 
         print(prompt)

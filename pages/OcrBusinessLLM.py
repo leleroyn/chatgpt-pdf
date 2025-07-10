@@ -1,43 +1,44 @@
+import io
 from time import time
 
 import streamlit as st
-from PIL import Image
 
 from service import *
 
 
 def main():
+    llm = "qwen3:4b"
     st.set_page_config(page_title="企业营业执照信息提取", layout="wide", menu_items={})
-    st.subheader("🐋企业营业执照信息提取取 - DeepSeek")
+    st.subheader(f"🐋企业营业执照信息提取取(OCR+{llm})")
     uploaded_file = st.file_uploader("上传企业营业执照影像", type=["png", "jpg", "bmp"])
     columns = st.columns(2)
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            image = orientation(pil2cv(image))
-            st.image(toRGB(image))
+            st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):
                 start = time()
-                ocr = OcrService()
-                textLines = ocr.detect_from_image_path(uploaded_file)
+                byte_stream = io.BytesIO()
+                image.save(byte_stream, format='PNG')
+                byte_data = byte_stream.getvalue()
+                paddleOcr = PaddleOcrService()
+                text = paddleOcr.ocr_text(byte_data)
                 end = time()
                 elapsed1 = end - start
-
+                st.info("OCR完成花费:{}s".format(elapsed1))
+                st.write(text)
                 start = time()
-                oneApiService = OneApiService("DeepSeek-V3")
-                text = ""
-                for v in textLines:
-                    text = text + v + "\n"
+                oneApiService = OneApiService(llm)
                 try:
-                    res = oneApiService.ocr_business_deepseek(text)
+                    res = oneApiService.ocr_business_llm(text)
                 except Exception as r:
                     st.warning('未知错误 %s' % r)
                 else:
                     end = time()
                     elapsed2 = end - start
-                    st.info("提取完成，OCR花费:{}s,AI提取花费:{} s".format(elapsed1, elapsed2))
-                    st.code(res, language="json", wrap_lines=True)
+                    st.info("提取完成花费:{}s".format(elapsed2))
+                    st.write(res)
 
 
 if __name__ == '__main__':

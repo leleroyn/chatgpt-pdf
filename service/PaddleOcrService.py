@@ -1,4 +1,7 @@
+import base64
+
 import numpy as np
+import requests
 from PIL import Image
 
 
@@ -54,9 +57,6 @@ class PaddleOcrService:
         return Image.fromarray(result.astype('uint8'))
 
     def ocr_seal(self, image_bytes):
-        import base64
-        import requests
-
         API_URL = "http://192.168.2.203:8080/seal-recognition"  # 服务URL
         image_data = base64.b64encode(image_bytes).decode("ascii")
         payload = {
@@ -87,3 +87,17 @@ class PaddleOcrService:
         except IndexError as e:
             print(f"索引错误: {e}")
         return "异常"
+
+    def ocr_text(self, image_bytes):
+        API_URL = "http://192.168.2.203:8081/ocr"  # 服务URL
+        image_data = base64.b64encode(image_bytes).decode("ascii")
+        payload = {
+            "file": image_data, "fileType": 1}  # Base64编码的文件内容或者图像URL
+        # 调用API
+        response = requests.post(API_URL, json=payload)
+        # 处理接口返回数据
+        assert response.status_code == 200
+        result = response.json()["result"]
+        rec_texts = result["ocrResults"][0]["prunedResult"]["rec_texts"]
+        rec_text = '\n'.join([text for text in rec_texts])
+        return rec_text
