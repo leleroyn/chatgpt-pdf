@@ -123,8 +123,8 @@ class OneApiService:
           - 成功(code=200)：所有必填项完整且格式正确（包括capital成功数字化）
           - 失败(code=500)：任一必填项缺失/格式错误/资本转换失败，返回msg字段说明具体原因
         5.响应格式：
-          - 成功：{ "code": 200, "name": "", "org_code": "", ... , "capital": "123456789" } 
-          - 失败：{ "code": 500, "msg": "capital格式无效" }  
+          - 成功：{ "code": 200, "name": "", "org_code": "", ...  } 
+          - 失败：{ "code": 500, "msg": "请重新上传更清晰的图片" }  
         '''
         base64_image = base64.b64encode(image_bytes).decode('utf-8')
         chat_completion = self.client.chat.completions.create(
