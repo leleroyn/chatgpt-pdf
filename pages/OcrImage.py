@@ -1,7 +1,7 @@
+import io
 from time import time
 
 import streamlit as st
-from PIL import Image
 
 from service import *
 
@@ -14,18 +14,19 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            image = orientation(pil2cv(image))
-            st.image(toRGB(image))
+            st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):
                 start = time()
-                ocr = OcrService()
-                res = ocr.detect_from_image_path(uploaded_file)
+                byte_stream = io.BytesIO()
+                image.save(byte_stream, format='PNG')
+                byte_data = byte_stream.getvalue()
+                paddleOcr = PaddleOcrService()
+                text = paddleOcr.ocr_text(byte_data)
                 end = time()
                 elapsed = end - start
                 st.info("识别完成，共花费 {} seconds".format(elapsed))
-                for v in res:
-                    st.write(v)
+                st.write(text)
 
 
 if __name__ == '__main__':
