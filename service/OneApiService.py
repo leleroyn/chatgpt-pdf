@@ -117,12 +117,54 @@ class OneApiService:
         2.禁止修改原始识别结果
         3.从图片中提取中国大陆企业营业执照信息，按字段输出：
           - name(名称) | org_code(社会统一信用代码) | business_type(类型) | person(法定代表人)
-          - create_date(成立日期) | business(经营范围) | address(住所)
+          - create_date(成立日期,YYYY-MM-DD格式) | business(经营范围) | address(住所)
           - capital(注册资本) | period(营业期限,若无返回空)
         4.状态规则：
           - 成功(code=200)：所有必填项完整且格式正确
           - 失败(code=500)：任一必填项缺失/格式错误/资本转换失败，返回msg字段说明具体原因
         5.响应格式：
+          - 成功：{ "code": 200, "name": "", "org_code": "", ...  } 
+          - 失败：{ "code": 500, "msg": "请重新上传更清晰的图片" }  
+        '''
+        base64_image = base64.b64encode(image_bytes).decode('utf-8')
+        chat_completion = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ], temperature=0
+        )
+        print(chat_completion)
+        return chat_completion.choices[0].message.content
+
+    def ocr_invoice_vl(self, image_bytes):
+        prompt = '''
+        你是一个发票识别专用模型，请严格按以下规则处理：
+        1.仅返回JSON格式数据，绝对不要包含任何解释、额外文字或Markdown代码块
+        2.禁止修改原始识别结果
+        3.从图片中提取中国大陆税务局开具的发票信息，按字段输出：
+          - invoice_no(发票号码,必填，为空时直接判定失败) | invoice_code(发票代码,电子发票时可能为空) | invoice_type(发票类型) | verify_code(校验码)
+          - invoice_date(开票日期,必填,YYYY-MM-DD格式) | purchaser_name(购货方公司名称) | seller_name(销售方公司名称)
+          - invoice_amt(发票金额,必填) | invoice_sum(发票总金额,必填)| invoice_tax(发票税金额,必填)
+        4.发票金额,发票总金额,发票税金额的关系
+          - 发票总金额 = 发票金额 + 发票税金额
+        5.状态规则：         
+          - 成功(code=200)：所有必填项完整且格式正确
+          - 失败(code=500)：任一必填项缺失/格式错误/资本转换失败，返回msg字段说明具体原因
+        6.响应格式：
           - 成功：{ "code": 200, "name": "", "org_code": "", ...  } 
           - 失败：{ "code": 500, "msg": "请重新上传更清晰的图片" }  
         '''
