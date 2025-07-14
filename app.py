@@ -16,8 +16,8 @@ def main():
             Page("pages/OcrIdcardVL.py", "身份证信息提取(QwenVL)", "🐻"),
             Page("pages/OcrBusinessLLM.py", "营业执照信息提取(OCR+LLM)", "🐋"),
             Page("pages/OcrBusinessVL.py", "营业执照信息提取(QwenVL)", "🐻"),
-            Page("pages/OcrInvoiceVL.py", "发票信息提取(QwenVL)", "🐻")
-
+            Page("pages/OcrInvoiceVL.py", "发票信息提取(QwenVL)", "🐻"),
+            Page("pages/ContractInfoLLM.py", "合同信息判定(OCR+LLM)", "🐋"),
         ]
     )
 

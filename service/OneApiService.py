@@ -1,14 +1,17 @@
 import base64
+import os
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
 
 class OneApiService:
     def __init__(self, model_name):
+        load_dotenv()
         self.model_name = model_name
         self.client = OpenAI(
-            api_key="sk-j6Bp6iYqcY9gBZLKD5B4C2E133F54d83961e10548c9e363a",
-            base_url="http://192.168.2.228:3000/v1"
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_BASE_URL")
         )
 
     def ocr_idcard_llm(self, question):
@@ -47,6 +50,28 @@ class OneApiService:
         - 切记不要返回任何多余的内容！
         - 结果一定要用json返回，不需要makedown样式 。
          <no_think>            
+        '''
+
+        print(prompt)
+
+        chat_completion = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+        )
+        print(chat_completion)
+        return chat_completion.choices[0].message.content
+
+    def contract_llm(self, question, content):
+        prompt = f'''
+        # 以下内容来自一份合同的OCR处理文本。
+        {content}
+        # 请根据内容认真回答下面的问题。
+        {question}
+        # 在回答时，请注意以下几点：        
+        - 如果答案全是肯定,返回“通过”,否则返回“不通过”,并说明原因.
+        - 结果不要含有makedown样式 。                    
         '''
 
         print(prompt)

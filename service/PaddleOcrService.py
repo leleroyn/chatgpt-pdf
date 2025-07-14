@@ -1,8 +1,10 @@
 import base64
+import os
 
 import numpy as np
 import requests
 from PIL import Image
+from dotenv import load_dotenv
 
 
 class PaddleOcrService:
@@ -57,7 +59,8 @@ class PaddleOcrService:
         return Image.fromarray(result.astype('uint8'))
 
     def ocr_seal(self, image_bytes):
-        API_URL = "http://192.168.2.203:8080/seal-recognition"  # 服务URL
+        load_dotenv()
+        API_URL = os.getenv("PADDLE_SEAL_URL")  # 服务URL
         image_data = base64.b64encode(image_bytes).decode("ascii")
         payload = {
             "file": image_data, "fileType": 1}  # Base64编码的文件内容或者图像URL
@@ -88,16 +91,30 @@ class PaddleOcrService:
             print(f"索引错误: {e}")
         return "异常"
 
-    def ocr_text(self, image_bytes):
-        API_URL = "http://192.168.2.203:8081/ocr"  # 服务URL
-        image_data = base64.b64encode(image_bytes).decode("ascii")
+    def ocr_text(self, file_bytes, file_type=1):
+        """
+        ocr图片或者pdf文件
+        :param file_bytes: 文件bits
+        :param file_type: 1=图片,0=pdf文件
+        :return:
+        """
+        global result_text
+        load_dotenv()
+        API_URL = os.getenv("PADDLE_OCR_URL")
+        file_data = base64.b64encode(file_bytes).decode("ascii")
         payload = {
-            "file": image_data, "fileType": 1}  # Base64编码的文件内容或者图像URL
+            "file": file_data, "fileType": file_type}  # Base64编码的文件内容或者图像URL
         # 调用API
         response = requests.post(API_URL, json=payload)
         # 处理接口返回数据
         assert response.status_code == 200
         result = response.json()["result"]
-        rec_texts = result["ocrResults"][0]["prunedResult"]["rec_texts"]
-        rec_text = '\n'.join([text for text in rec_texts])
-        return rec_text
+        # 提取rec_texts并组合成一段字符串
+        combined_text = ""
+        for page in result['ocrResults']:
+            combined_text += '\n'.join(page['prunedResult']['rec_texts']) + '\n\n'  # 每页内容之间加两个换行符
+
+        return combined_text
+
+
+

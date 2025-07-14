@@ -8,7 +8,8 @@ from service.OcrService import resize_image
 
 
 def main():
-    llm = "qwen2.5vl:7b"
+    load_dotenv()
+    llm = os.getenv("QWEN2.5VL_VERSION")
     st.set_page_config(page_title="身份证信息提取", layout="wide", menu_items={})
     st.subheader(f"🐻身份证信息提取({llm})")
     uploaded_file = st.file_uploader("上传身份证影像", type=["png", "jpg", "bmp"])

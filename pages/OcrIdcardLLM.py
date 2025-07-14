@@ -7,7 +7,8 @@ from service import *
 
 
 def main():
-    llm = "qwen3:4b"
+    load_dotenv()
+    llm = os.getenv("QWEN3_VERSION")
     st.set_page_config(page_title="身份证信息提取", layout="wide", menu_items={})
     st.subheader(f"🐋身份证信息提取(OCR+{llm})")
     uploaded_file = st.file_uploader("上传身份证影像", type=["png", "jpg", "bmp"])
