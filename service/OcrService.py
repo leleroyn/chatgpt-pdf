@@ -57,6 +57,36 @@ def orientation(image_cv):
         return image_cv
 
 
+def resize_image(img, max_size):
+    """
+    将PIL.Image图像按比例缩放，确保最大边长不超过1000像素
+    :param max_size:
+    :param img: PIL.Image对象
+    :return: 缩放后的PIL.Image对象
+    """
+    # 获取原始尺寸
+    original_width, original_height = img.size
+
+    # 检查是否需要缩放
+    if max(original_width, original_height) <= max_size:
+        return img.copy()  # 返回原图副本避免修改原图
+
+    # 计算缩放比例
+    ratio = min(max_size / original_width, max_size / original_height)
+    new_width = int(original_width * ratio)
+    new_height = int(original_height * ratio)
+
+    # 高质量缩放（支持新/旧版本Pillow）
+    try:
+        # Pillow 9.0+ 版本
+        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    except AttributeError:
+        # 旧版本兼容
+        resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+
+    return resized_img
+
+
 class OcrService:
     def __init__(self):
         self.rapid_ocr = RapidOCR(use_cls=False)

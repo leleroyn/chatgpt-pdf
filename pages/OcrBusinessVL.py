@@ -4,10 +4,11 @@ from time import time
 import streamlit as st
 
 from service import *
+from service.OcrService import resize_image
 
 
 def main():
-    llm = "qwen2.5vl:3b"
+    llm = "qwen2.5vl:7b"
     st.set_page_config(page_title="企业营业执照信息提取", layout="wide", menu_items={})
     st.subheader(f"🐻企业营业执照信息提取取({llm})")
     uploaded_file = st.file_uploader("上传企业营业执照影像", type=["png", "jpg", "bmp"])
@@ -15,6 +16,7 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
+            image = resize_image(image, 1000)
             st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):
