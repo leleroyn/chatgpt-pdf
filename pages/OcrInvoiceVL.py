@@ -9,7 +9,7 @@ from service.OcrService import resize_image
 
 def main():
     load_dotenv()
-    llm = os.getenv("QWEN2.5VL_VERSION")
+    llm = os.getenv("VLM_VERSION")
     st.set_page_config(page_title="发票信息提取", layout="wide", menu_items={})
     st.subheader(f"🐻发票信息提取({llm})")
     uploaded_file = st.file_uploader("上传发票信息影像", type=["png", "jpg", "bmp"])

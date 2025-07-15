@@ -142,6 +142,15 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "你是一个严谨的视觉助手，仅根据图片内容作答。"
+                        }
+                    ]
+                },
+                {
                     "role": "user",
                     "content": [
                         {
@@ -156,7 +165,7 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0
+            ], temperature=0.1
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -182,6 +191,15 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "你是一个严谨的视觉助手，仅根据图片内容作答。"
+                        }
+                    ]
+                },
+                {
                     "role": "user",
                     "content": [
                         {
@@ -196,7 +214,7 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0
+            ], temperature=0.1
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -224,6 +242,15 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "你是一个严谨的视觉助手，仅根据图片内容作答。"
+                        }
+                    ]
+                },
+                {
                     "role": "user",
                     "content": [
                         {
@@ -238,7 +265,7 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0
+            ], temperature=0.1
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content

@@ -8,7 +8,7 @@ from service import *
 
 def main():
     load_dotenv()
-    llm = os.getenv("QWEN3_VERSION")
+    llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="企业营业执照信息提取", layout="wide", menu_items={})
     st.subheader(f"🐋企业营业执照信息提取取(OCR+{llm})")
     uploaded_file = st.file_uploader("上传企业营业执照影像", type=["png", "jpg", "bmp"])

@@ -7,7 +7,7 @@ from service import *
 
 def main():
     load_dotenv()
-    llm = os.getenv("QWEN3_VERSION")
+    llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
     st.subheader(f"🐋合同信息判定(OCR+{llm})")
     uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
