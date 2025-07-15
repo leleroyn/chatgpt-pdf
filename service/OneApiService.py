@@ -119,7 +119,7 @@ class OneApiService:
         3.从图片中提取中华人民共和国居民身份证信息，按字段输出：
         - name(姓名) | gender(性别) | ethnicity(民族，注意：按原文直接返回!)
         - birth_date(出生,YYYY-MM-DD格式) | address(住址) 
-        - id_number(公民身份号码) | issuing_authority(签发机关，若无则空字符串) | valid_period(有效期限,按原文直接返回，若无则空字符串)
+        - id_number(公民身份号码) | issuing_authority(签发机关，按原文直接返回，若无返回空) | valid_period(有效期限,按原文直接返回，若无返回空)
         4.状态规则：
         - 成功(code=200)：所有必填项完整且格式正确
         - 失败(code=500)：任一必填项缺失/格式错误，返回msg字段说明具体原因
