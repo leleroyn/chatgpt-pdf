@@ -17,7 +17,7 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            image = resize_image(image, 1000)
+            #image = resize_image(image, 1000)
             st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):
