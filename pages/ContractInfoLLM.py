@@ -26,21 +26,30 @@ def main():
                 paddleOcr = PaddleOcrService()
                 if uploaded_file.name.lower().endswith(".pdf"):
                     text = paddleOcr.ocr_text(file_bits, 0)
+                    seal = paddleOcr.ocr_seal(file_bits,0)
                 else:
                     text = paddleOcr.ocr_text(file_bits, 1)
+                    seal = paddleOcr.ocr_seal(file_bits, 1)
                 end = time()
                 elapsed = end - start
-                st.info("识别完成，共花费 {} seconds".format(elapsed))
+                st.success("识别完成，共花费 {} seconds".format(elapsed))
+                st.info("合同文本内容")
                 st.caption(text)
+                st.info("合同印章内容")
+                st.caption(seal)
 
         with columns[1]:
             if button:
                 start = time()
                 oneApiService = OneApiService(llm)
-                result = oneApiService.contract_llm(user_input, text)
+                full_text = f'''
+                合同文本内容如下：\n {text} \n
+                合同印章内容如下：\n {seal} \n
+                '''
+                result = oneApiService.contract_llm(user_input, full_text)
                 end = time()
                 elapsed = end - start
-                st.info("处理完成，共花费 {} seconds".format(elapsed))
+                st.success("处理完成，共花费 {} seconds".format(elapsed))
                 st.write(result)
 
 

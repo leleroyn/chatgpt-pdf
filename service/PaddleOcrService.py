@@ -58,12 +58,12 @@ class PaddleOcrService:
         result = np.where(black_mask[..., None], convolved, arr)
         return Image.fromarray(result.astype('uint8'))
 
-    def ocr_seal(self, image_bytes):
+    def ocr_seal(self, image_bytes, file_type=1):
         load_dotenv()
         API_URL = os.getenv("PADDLE_SEAL_URL")  # 服务URL
         image_data = base64.b64encode(image_bytes).decode("ascii")
         payload = {
-            "file": image_data, "fileType": 1}  # Base64编码的文件内容或者图像URL
+            "file": image_data, "fileType": file_type}  # Base64编码的文件内容或者图像URL
         # 调用API
         response = requests.post(API_URL, json=payload)
         # 处理接口返回数据

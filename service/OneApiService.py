@@ -98,7 +98,7 @@ class OneApiService:
     def contract_llm(self, question, content):
         prompt = f'''
         # 合同审查任务说明  
-        **输入数据**：OCR处理的合同文本片段
+        **输入数据**：OCR处理的合同文本内容
         {content}
         
         **待审查问题列表**：  
