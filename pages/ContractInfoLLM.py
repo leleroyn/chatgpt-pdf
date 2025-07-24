@@ -1,4 +1,4 @@
-from time import time
+import json
 
 import streamlit as st
 
@@ -7,9 +7,8 @@ from service import *
 
 def main():
     load_dotenv()
-    llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
-    st.subheader(f"🐋合同信息判定(OCR+{llm})")
+    st.subheader(f"🐋合同信息判定(OCR+llm)")
     uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
     columns = st.columns(2)
     if uploaded_file is not None:
@@ -21,36 +20,29 @@ def main():
             )
             button = st.button("开始询问")
             if button:
-                file_bits = uploaded_file.getvalue()
-                start = time()
-                paddleOcr = PaddleOcrService()
-                if uploaded_file.name.lower().endswith(".pdf"):
-                    text = paddleOcr.ocr_text(file_bits, 0)
-                    seal = paddleOcr.ocr_seal(file_bits,0)
-                else:
-                    text = paddleOcr.ocr_text(file_bits, 1)
-                    seal = paddleOcr.ocr_seal(file_bits, 1)
-                end = time()
-                elapsed = end - start
-                st.success("识别完成，共花费 {} seconds".format(elapsed))
-                st.info("合同文本内容")
-                st.caption(text)
-                st.info("合同印章内容")
-                st.caption(seal)
+                url = os.getenv("DFS_URL")
+                files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
+                r = requests.post(url, files=files)
+                data = json.loads(r.text)
+                print(data)
+                file_dfs_url = data["map"]["privateUrl"]
+                args = {'fileUrl': file_dfs_url, 'seal': 1, "question": user_input,
+                        'returnOcrText': 1, 'returnLLMThink': 1}
+                valid_result = requests.post(os.getenv("CONTRACT_VALID_URL"), json=args)
+                valid_data = json.loads(valid_result.text)
+                print(valid_data)
+                st.info("合同内容")
+                st.caption(valid_data.get("data", {}).get("ocrText", ""))
 
         with columns[1]:
             if button:
-                start = time()
-                oneApiService = OneApiService(llm)
-                full_text = f'''
-                合同文本内容如下：\n {text} \n
-                合同印章内容如下：\n {seal} \n
-                '''
-                result = oneApiService.contract_llm(user_input, full_text)
-                end = time()
-                elapsed = end - start
-                st.success("处理完成，共花费 {} seconds".format(elapsed))
-                st.write(result)
+                st.info("AI思考过程")
+                st.caption(valid_data.get("data", {}).get("think", ""))
+                st.info("判定结果")
+                st.write(
+                    ("✔️" if valid_data.get("data", {}).get("result", "") == 1 else "❎️",
+                     valid_data.get("data", {}).get(
+                         "reason", "")))
 
 
 if __name__ == '__main__':

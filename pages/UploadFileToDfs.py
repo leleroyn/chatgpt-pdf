@@ -1,3 +1,5 @@
+import os
+
 import requests
 import streamlit as st
 
@@ -12,7 +14,7 @@ def main():
     st.subheader("📤上传文件到DFS服务器")
     uploaded_file = st.file_uploader("上传文件", type=["png", "jpg", "bmp", "pdf", "zip"])
     if uploaded_file is not None:
-        url = 'http://192.168.2.203:8090/test/0/upload'
+        url = os.getenv("DFS_URL")
         files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
         r = requests.post(url, files=files)
         st.info("上传成功.")
