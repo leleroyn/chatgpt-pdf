@@ -18,15 +18,14 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            #orientation_image = orientation(pil2cv(image))
-            #st.image(toRGB(image))
+            #image = image.convert("L")
             st.image(image)
         with columns[1]:
             paddle_ocr = PaddleOcrService()
 
-            #fin_img = paddle_ocr.replace_black_with_white(paddle_ocr.boost_red(image, saturation_factor=2.8),
+            # fin_img = paddle_ocr.replace_black_with_white(paddle_ocr.boost_red(image, saturation_factor=2.8),
             #                                                  threshold=50)
-            #fin_img = paddle_ocr.boost_red(paddle_ocr.replace_black_with_white(image, threshold=50), saturation_factor=2.8)
+            # fin_img = paddle_ocr.boost_red(paddle_ocr.replace_black_with_white(image, threshold=50), saturation_factor=2.8)
 
             byte_stream = io.BytesIO()
             # 将图像保存到字节流对象中
@@ -35,7 +34,7 @@ def main():
             byte_data = byte_stream.getvalue()
             result = paddle_ocr.ocr_seal(byte_data)
             st.write(result)
-            #st.download_button("下载", byte_data, file_name=uploaded_file.name)
+            # st.download_button("下载", byte_data, file_name=uploaded_file.name)
 
 
 if __name__ == '__main__':

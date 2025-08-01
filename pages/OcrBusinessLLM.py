@@ -16,6 +16,7 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
+            image = image.convert("L")
             st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):

@@ -14,12 +14,15 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             user_input = st.text_area(
-                label="请根据下面格式对合同内容进行提问",  # 顶部加粗提示
-                placeholder="1.是否存在xxx\n2.是否存在xxx",  # 框内灰色提示
-                height=150  # 设置输入框高度
+                label="请根据下面格式对合同内容进行提问",
+                placeholder="1.是否存在xxx\n2.是否存在xxx",
+                height=150
             )
             button = st.button("开始询问")
             if button:
+                if not user_input.strip():
+                    st.error("提问内容不能为空", icon="⚠️")
+                    return
                 url = os.getenv("DFS_URL")
                 files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
                 r = requests.post(url, files=files)
@@ -31,6 +34,9 @@ def main():
                 valid_result = requests.post(os.getenv("CONTRACT_VALID_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
                 print(valid_data)
+                if valid_data.get("code") == "99":
+                    st.error(valid_data.get("message"), icon="⚠️")
+                    return
                 st.info("合同内容")
                 st.caption(valid_data.get("data", {}).get("ocrText", ""))
 
@@ -40,7 +46,7 @@ def main():
                 st.caption(valid_data.get("data", {}).get("think", ""))
                 st.info("判定结果")
                 st.write(
-                    ("✔️" if valid_data.get("data", {}).get("result", "") == 1 else "❎️",
+                    ("✔️" if valid_data.get("data", {}).get("result", "") == 1 else "❌",
                      valid_data.get("data", {}).get(
                          "reason", "")))
 

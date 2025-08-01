@@ -57,34 +57,61 @@ def orientation(image_cv):
         return image_cv
 
 
-def resize_image(img, max_size):
+def enhance_text_clarity(pil_image,
+                         sharpen_strength=1.8,
+                         contrast_factor=1.5,
+                         use_unsharp_mask=True,
+                         use_contrast=True):
     """
-    将PIL.Image图像按比例缩放，确保最大边长不超过1000像素
-    :param max_size:
-    :param img: PIL.Image对象
-    :return: 缩放后的PIL.Image对象
+    增强图像中文字的清晰度（支持文档/身份证等场景）
+
+    参数:
+        pil_image: PIL.Image对象（支持RGB/L模式）
+        sharpen_strength: 锐化强度 (1.0-3.0)，默认为1.8
+        contrast_factor: 对比度增强系数 (1.0-3.0)，默认为1.5
+        use_unsharp_mask: 启用未锐化掩模算法，默认为True
+        use_contrast: 启用对比度增强，默认为True
+
+    返回:
+        PIL.Image对象（L模式）
     """
-    # 获取原始尺寸
-    original_width, original_height = img.size
+    # 转换为OpenCV格式（自动处理色彩空间）
+    if pil_image.mode == 'RGB':
+        np_image = np.array(pil_image)
+        opencv_image = cv2.cvtColor(np_image, cv2.COLOR_RGB2BGR)
+        gray = cv2.cvtColor(opencv_image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = np.array(pil_image)
 
-    # 检查是否需要缩放
-    if max(original_width, original_height) <= max_size:
-        return img.copy()  # 返回原图副本避免修改原图
+    # 1. 未锐化掩模技术（核心文字增强）
+    if use_unsharp_mask:
+        blurred = cv2.GaussianBlur(gray, (0, 0), 3.0)
+        unsharp = cv2.addWeighted(gray, 1.5, blurred, -0.5, 0)
+        enhanced = unsharp
+    else:
+        enhanced = gray
 
-    # 计算缩放比例
-    ratio = min(max_size / original_width, max_size / original_height)
-    new_width = int(original_width * ratio)
-    new_height = int(original_height * ratio)
+    # 2. 对比度增强（强化文字与背景差异）
+    if use_contrast:
+        enhanced = cv2.convertScaleAbs(enhanced, alpha=contrast_factor, beta=0)
 
-    # 高质量缩放（支持新/旧版本Pillow）
-    try:
-        # Pillow 9.0+ 版本
-        resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    except AttributeError:
-        # 旧版本兼容
-        resized_img = img.resize((new_width, new_height), Image.LANCZOS)
+    # 3. 锐化加强（可选：针对小字号文本）
+    if sharpen_strength > 1.0:
+        kernel = np.array([[0, -1, 0],
+                           [-1, 5 * sharpen_strength, -1],
+                           [0, -1, 0]])
+        enhanced = cv2.filter2D(enhanced, -1, kernel)
 
-    return resized_img
+    # 4. 二值化优化（增强黑白对比）
+    _, binary = cv2.threshold(
+        enhanced,
+        0,
+        255,
+        cv2.THRESH_BINARY + cv2.THRESH_OTSU  # 自动计算最佳阈值
+    )
+
+    # 转回PIL格式
+    return Image.fromarray(binary, 'L')
 
 
 class OcrService:

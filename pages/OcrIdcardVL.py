@@ -4,7 +4,6 @@ from time import time
 import streamlit as st
 
 from service import *
-from service.OcrService import resize_image
 
 
 def main():
@@ -17,7 +16,7 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            #image = resize_image(image, 1000)
+            image = image.convert("L")
             st.image(image)
         with columns[1]:
             with st.spinner("Please waiting..."):
