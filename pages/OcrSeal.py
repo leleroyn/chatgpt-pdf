@@ -1,8 +1,11 @@
 import io
+from base64 import b64decode
+from time import time
 
 import streamlit as st
 
 from service import *
+from service.IPService import IPService
 
 
 def main():
@@ -18,23 +21,32 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            #image = image.convert("L")
+            # image = image.convert("L")
             st.image(image)
         with columns[1]:
+            start = time()
             paddle_ocr = PaddleOcrService()
-
-            # fin_img = paddle_ocr.replace_black_with_white(paddle_ocr.boost_red(image, saturation_factor=2.8),
-            #                                                  threshold=50)
-            # fin_img = paddle_ocr.boost_red(paddle_ocr.replace_black_with_white(image, threshold=50), saturation_factor=2.8)
-
+            ips_service = IPService()
             byte_stream = io.BytesIO()
-            # 将图像保存到字节流对象中
             image.save(byte_stream, format='PNG')
-            # 获取字节数据
             byte_data = byte_stream.getvalue()
-            result = paddle_ocr.ocr_seal(byte_data)
-            st.write(result)
-            # st.download_button("下载", byte_data, file_name=uploaded_file.name)
+            results = ips_service.sel_preprocess(byte_data, tool=(0.6, True, True))
+            if not results:
+                st.info("没有检测到任何印章.")
+                return
+            end = time()
+            elapsed1 = end - start
+            start = time()
+            for res in results:
+                image_bytes = b64decode(res["seal_image_base64"])
+                image_stream = io.BytesIO(image_bytes)  # 字节流转为内存文件对象
+                rec_text = paddle_ocr.ocr_seal(image_stream.getvalue())
+                st.write(rec_text)
+                st.divider()
+
+            end = time()
+            elapsed2 = end - start
+            st.info(f"提取花费：***{elapsed1}***s | 识别花费：***{elapsed2}***s")
 
 
 if __name__ == '__main__':

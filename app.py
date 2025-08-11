@@ -6,7 +6,7 @@ from st_pages import show_pages, Page, add_page_title
 def main():
     show_pages(
         [
-            Page("pages/ExtractSeal.py", "提取图片中的印章", "📕"),
+            Page("pages/ExtractSeal.py", "检测图片中的印章", "📕"),
             Page("pages/OcrSeal.py", "印章提取(Paddle)", "📕"),
             Page("pages/OcrImage.py", "图片文字提取(Paddle)", "🚤"),
             Page("pages/OcrPdf.py", "PDF文字提取(Paddle)", "🚤"),

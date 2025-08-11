@@ -1,3 +1,4 @@
+import PIL.Image
 import cv2
 import numpy as np
 from PIL import Image
@@ -13,6 +14,74 @@ def toRGB(image):
         new_image = cv2.cvtColor(new_image, cv2.COLOR_BGRA2RGBA)
     return Image.fromarray(new_image)
 
+
+def create_centered_image(image, background_size=(640, 640)):
+    """
+    创建白板并将指定图片居中放置
+
+    参数:
+        image: PIL.Image对象（直接传入图像对象，而非文件路径）
+        background_size: 白板尺寸，必须为元组 (宽, 高)
+
+    返回:
+        PIL.Image对象
+    """
+    try:
+        # 确保background_size是元组
+        if not isinstance(background_size, tuple):
+            background_size = tuple(background_size)  # 转换为元组
+
+        # 创建纯白背景
+        white_board = Image.new('RGB', background_size, (255, 255, 255))
+
+        if image:
+            # 计算居中位置
+            x = (background_size[0] - image.width) // 2
+            y = (background_size[1] - image.height) // 2
+
+            # 将图片粘贴到白板中心
+            white_board.paste(image, (x, y))
+
+        return white_board
+
+    except Exception as e:
+        print(f"图片处理错误: {e}")
+        return Image.new('RGB', background_size, (255, 255, 255))  # 返回空白图像作为降级处理
+
+
+def resize_image_if_large(
+        img: Image.Image,
+        max_size: tuple[int, int] = (320, 320),
+        resample=Image.Resampling.LANCZOS
+) -> Image.Image:
+    """
+    如果图片尺寸大于指定尺寸，按比例缩放至该尺寸
+    否则返回原图
+
+    参数:
+        img: 输入的PIL.Image对象
+        max_size: 最大尺寸 (宽度, 高度)，默认320×320
+        resample: 缩放算法，默认LANCZOS（高质量）
+
+    返回:
+        处理后的PIL.Image对象
+    """
+    width, height = img.size
+    max_width, max_height = max_size
+
+    # 如果图片尺寸已经小于等于目标尺寸，直接返回
+    if width <= max_width and height <= max_height:
+        return img.copy()
+
+    # 计算保持宽高比的缩放比例
+    ratio = min(max_width / width, max_height / height)
+
+    # 计算新尺寸
+    new_width = int(width * ratio)
+    new_height = int(height * ratio)
+
+    # 应用缩放
+    return img.resize((new_width, new_height), resample=resample)
 
 class ExtractSealService(object):
     def __init__(self, img_bits):

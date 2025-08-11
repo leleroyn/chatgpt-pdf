@@ -67,7 +67,9 @@ class PaddleOcrService:
         # 调用API
         response = requests.post(API_URL, json=payload)
         # 处理接口返回数据
-        assert response.status_code == 200
+        if response.status_code != 200:
+            error_msg = f"OCR服务调用失败！状态码：{response.status_code}，响应：{response.text[:500]}"
+            raise ConnectionError(error_msg)  # 触发可捕获的异常
         result = response.json()["result"]
         try:
             # 导航到目标路径: result -> sealRecResults -> [0] -> prunedResult -> seal_res_list -> [0]
@@ -83,7 +85,7 @@ class PaddleOcrService:
                 return all_rec
             else:
                 print("seal_res_list为空")
-                return "没有找到印章"
+                return "无法识别印章内容(印章不清晰)"
 
         except KeyError as e:
             print(f"键错误: {e}")

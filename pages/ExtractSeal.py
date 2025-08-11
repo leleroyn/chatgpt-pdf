@@ -1,36 +1,52 @@
 import io
+from base64 import b64decode
+from time import time
 
 import streamlit as st
+from PIL import Image
+from dotenv import load_dotenv
 
-from service import ExtractSealService
+from service.IPService import IPService
 
 
 def main():
-    st.set_page_config(page_title="提取红色印章图片", layout="wide", menu_items={})
+    load_dotenv()
+    st.set_page_config(page_title="检测图片中的印章", layout="wide", menu_items={})
     # 隐藏右边的菜单以及页脚
     hide_streamlit_style = """<style> #MainMenu {visibility: hidden;} footer {visibility: hidden;} p {
         font-size:14px}</style>"""
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    st.subheader("📕提取红色印章图片")
+    st.subheader("📕检测图片中的印章")
     uploaded_file = st.file_uploader("上传文件", type=["png", "jpg", "bmp"])
     columns = st.columns(2)
     if uploaded_file is not None:
-        extract_seal = ExtractSealService(uploaded_file.getbuffer())
-        cnt_img, extr_img = extract_seal.pick_seal_image()
         with columns[0]:
-            st.image(cnt_img)
+            image = Image.open(uploaded_file)
+            st.image(image)
         with columns[1]:
-            if extr_img is None:
-                st.warning("没有识别到红色区域!")
-            else:
-                st.image(extr_img)
-                byte_stream = io.BytesIO()
-                # 将图像保存到字节流对象中
-                extr_img.save(byte_stream, format='JPEG')
-                # 获取字节数据
-                byte_data = byte_stream.getvalue()
-                st.download_button("下载", byte_data,file_name=uploaded_file.name)
+            start = time()
+            ips_service = IPService()
+            byte_stream = io.BytesIO()
+            image.save(byte_stream, format='PNG')
+            byte_data = byte_stream.getvalue()
+            results = ips_service.sel_preprocess(byte_data, tool=(0.6, False, False))
+            if not results:
+                st.info("没有检测到任何印章.")
+                return
+            end = time()
+            elapsed = end - start
+            st.info(f"提取完成，花费：{elapsed}")
+            item = 1
+            for res in results:
+                image_bytes = b64decode(res["seal_image_base64"])
+                image_stream = io.BytesIO(image_bytes)  # 字节流转为内存文件对象
+                image = Image.open(image_stream)
+                st.image(image)
+                st.info(f"目标 {item}: ***{ips_service.convert_seal_type(res['seal_type'])}*** | "
+                        f"置信度: {res['confidence']} "
+                        )
+                item = item + 1
 
 
 if __name__ == '__main__':

@@ -61,7 +61,7 @@ class OneApiService:
 
     def ocr_invoice_llm(self, question):
         prompt = f'''
-        以下内容可能来源于一张中国大陆的发票影像OCR处理文本：
+        以下内容可能来源于一张中国大陆的发票影像OCR处理文本,请快速回答：
         {question}
         请根据文本信息提取下面关键信息：        
         发票号码,发票代码,发票类型,校验码,开票日期,购货方公司名称,销售方公司名称,发票金额,发票总金额 

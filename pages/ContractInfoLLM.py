@@ -9,10 +9,25 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
     st.subheader(f"🐋合同信息判定(OCR+llm)")
-    uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
-    columns = st.columns(2)
+    column_head = st.columns([1, 1, 1], gap="medium")
+    with column_head[0]:
+        uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
+    with column_head[1]:
+        seal_options = st.multiselect(
+            "印章筛选",
+            ["红色圆章", "灰色圆章"],
+            default=["红色圆章", "灰色圆章"],
+        )
+    with column_head[2]:
+        doc_options = st.multiselect(
+            "文档类型",
+            ["合同", "身份证", "营业执照", "发票"],
+            default=["合同"],
+        )
+    columns = st.columns(2, gap="medium")
     if uploaded_file is not None:
         with columns[0]:
+            st.divider()
             user_input = st.text_area(
                 label="请根据下面格式对合同内容进行提问",
                 placeholder="1.是否存在xxx\n2.是否存在xxx",
@@ -20,6 +35,9 @@ def main():
             )
             button = st.button("开始询问")
             if button:
+                if not doc_options:
+                    st.error("文档类型不能为空", icon="⚠️")
+                    return
                 if not user_input.strip():
                     st.error("提问内容不能为空", icon="⚠️")
                     return
@@ -29,7 +47,9 @@ def main():
                 data = json.loads(r.text)
                 print(data)
                 file_dfs_url = data["map"]["privateUrl"]
-                args = {'fileUrl': file_dfs_url, 'seal': 1, "question": user_input,
+                select_seal = [1 if color == "红色圆章" else 2 if color == "灰色圆章" else None for color in
+                               seal_options]
+                args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input,
                         'returnOcrText': 1, 'returnLLMThink': 1}
                 valid_result = requests.post(os.getenv("CONTRACT_VALID_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
@@ -41,6 +61,7 @@ def main():
                 st.caption(valid_data.get("data", {}).get("ocrText", ""))
 
         with columns[1]:
+            st.divider()
             if button:
                 st.info("AI思考过程")
                 st.caption(valid_data.get("data", {}).get("think", ""))
