@@ -65,8 +65,8 @@ class OneApiService:
         {question}
         请根据文本信息提取下面关键信息：        
         发票号码,发票代码,发票类型,校验码,开票日期,购货方公司名称,销售方公司名称,发票金额,发票总金额 
-        结果以JSON格式返回,注意：无法判断的信息直接返回空。   
-        </no_think>   
+        结果以JSON格式返回,注意：无法判断的信息直接返回空。 
+        </no_think>
         '''
         chat_completion = self.client.chat.completions.create(
             model=self.model_name,

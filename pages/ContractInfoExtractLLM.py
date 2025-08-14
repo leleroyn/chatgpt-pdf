@@ -7,8 +7,8 @@ from service import *
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
-    st.subheader(f"🐋合同信息判定(OCR+llm)")
+    st.set_page_config(page_title="合同关键信息抽取", layout="wide", menu_items={})
+    st.subheader(f"🐋合同关键信息抽取(OCR+llm)")
     column_head = st.columns([1, 1, 1], gap="medium")
     with column_head[0]:
         uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
@@ -28,8 +28,8 @@ def main():
         with columns[0]:
             st.divider()
             user_input = st.text_area(
-                label="请根据下面格式对合同内容进行提问",
-                placeholder="1.是否存在xxx\n2.是否存在xxx",
+                label="请输入要抽取的关键内容",
+                placeholder="如姓名,性别，出生日期",
                 height=150
             )
             button = st.button("开始询问")
@@ -38,7 +38,7 @@ def main():
                     st.error("文档类型不能为空", icon="⚠️")
                     return
                 if not user_input.strip():
-                    st.error("提问内容不能为空", icon="⚠️")
+                    st.error("抽取的关键内容不能为空", icon="⚠️")
                     return
                 url = os.getenv("DFS_URL")
                 files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
@@ -52,7 +52,7 @@ def main():
                 print(select_doc)
                 args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc,
                         'returnOcrText': 1, 'returnLLMThink': 1}
-                valid_result = requests.post(os.getenv("CONTRACT_VALID_URL"), json=args)
+                valid_result = requests.post(os.getenv("CONTRACT_EXTRACT_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
                 print(valid_data)
                 if valid_data.get("code") == "99":
@@ -69,11 +69,8 @@ def main():
         with columns[2]:
             st.divider()
             if button:
-                st.info("判定结果")
-                st.write(
-                    ("✔️" if valid_data.get("data", {}).get("result", "") == 1 else "❌",
-                     valid_data.get("data", {}).get(
-                         "reason", "")))
+                st.info("提取结果")
+                st.write(valid_data.get("data", {}).get("result", ""))
 
 
 if __name__ == '__main__':

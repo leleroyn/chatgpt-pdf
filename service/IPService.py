@@ -6,13 +6,14 @@ import requests
 
 
 class IPService:
-    def seal_preprocess(self, image_bytes, return_seal_image: bool = True,
-                       tool: Tuple[float, bool, bool] = (0.5, True, True)) -> List[Dict]:
+    def seal_preprocess(self, image_bytes, return_seal_image: bool = True, return_ocr_text: bool = True,
+                        tool: Tuple[float, bool, bool] = (0.5, True, True)) -> List[Dict]:
         API_URL = os.getenv("IPS_SEAL_PREPROCESS")  # 服务URL
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
             "return_seal_image": return_seal_image,
+            "return_ocr_text": return_ocr_text,
             "tool": {"init_confidence": tool[0],
                      "resize": tool[1],
                      "back_ground": tool[2]
@@ -26,13 +27,14 @@ class IPService:
             raise ConnectionError(error_msg)  # 触发可捕获的异常
         return response.json()
 
-    def invoice_preprocess(self, image_bytes, return_corp_image: bool = True,
-                       tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
+    def invoice_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = True,
+                           tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
         API_URL = os.getenv("IPS_INVOICE_PREPROCESS")  # 服务URL
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
             "return_corp_image": return_corp_image,
+            "return_ocr_text": return_ocr_text,
             "tool": {"init_confidence": tool[0],
                      "resize": tool[1],
                      "back_ground": tool[2]
@@ -46,7 +48,28 @@ class IPService:
             raise ConnectionError(error_msg)  # 触发可捕获的异常
         return response.json()
 
-    def convert_seal_type(self,seal_code):
+    def idcard_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = False,
+                          tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
+        API_URL = os.getenv("IPS_IDCARD_PREPROCESS")  # 服务URL
+        image_data = base64.b64encode(image_bytes).decode("utf-8")
+        payload = {
+            "image_base64": image_data,
+            "return_corp_image": return_corp_image,
+            "return_ocr_text": return_ocr_text,
+            "tool": {"init_confidence": tool[0],
+                     "resize": tool[1],
+                     "back_ground": tool[2]
+                     }
+        }
+        # 调用API
+        response = requests.post(API_URL, json=payload)
+        # 处理接口返回数据
+        if response.status_code != 200:
+            error_msg = f"IPS服务调用失败！状态码：{response.status_code}，响应：{response.text[:500]}"
+            raise ConnectionError(error_msg)  # 触发可捕获的异常
+        return response.json()
+
+    def convert_seal_type(self, seal_code):
         """
         将印章类型编码转换为中文描述
         :param seal_code: 印章类型编码（整数 1 或 2）
@@ -58,15 +81,25 @@ class IPService:
         }
         return seal_type_mapping.get(seal_code, "未知类型")
 
-    def convert_invoice_type(self,seal_code):
+    def convert_invoice_type(self, invoice_code):
         """
         将印章类型编码转换为中文描述
         :param seal_code: 印章类型编码（整数 1 或 2）
         :return: 对应的中文描述字符串
         """
         seal_type_mapping = {
-            1: "电子发票",
-            2: "普通发票",
-            3: "专用发票"
+            1: "发票"
         }
-        return seal_type_mapping.get(seal_code, "未知类型")
+        return seal_type_mapping.get(invoice_code, "未知类型")
+
+    def convert_idcard_type(self, idcard_code):
+        """
+        将印章类型编码转换为中文描述
+        :param seal_code: 印章类型编码（整数 1 或 2）
+        :return: 对应的中文描述字符串
+        """
+        seal_type_mapping = {
+            1: "正面",
+            2: "背面"
+        }
+        return seal_type_mapping.get(idcard_code, "未知类型")
