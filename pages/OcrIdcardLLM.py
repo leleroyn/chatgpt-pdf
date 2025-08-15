@@ -29,7 +29,7 @@ def main():
                 image.save(byte_stream, format='PNG')
                 byte_data = byte_stream.getvalue()
                 start = time()
-                results = ips_service.idcard_preprocess(byte_data, return_ocr_text=True, return_corp_image=False,
+                results = ips_service.idcard_preprocess(byte_data, return_ocr_text=True, return_corp_image=True,
                                                         tool=(conf_size, True, False))
                 if not results:
                     st.info("没有检测到任何身份证.")
@@ -48,6 +48,7 @@ def main():
                 for res in results:
                     st.info(
                         f"检测到身份证，类型:***{ips_service.convert_idcard_type(res['idcard_type'])}*** | 置信值:{res['confidence']}")
+                    st.image(ips_service.base64_to_pil(res['corp_image_base64']))
                     ocr_result.append(res["ocr_text"])
                 ocr_text = "\\n".join(ocr_result)
                 st.write(ocr_text)

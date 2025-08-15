@@ -28,13 +28,14 @@ def main():
             byte_stream = io.BytesIO()
             image.save(byte_stream, format='PNG')
             byte_data = byte_stream.getvalue()
-            results = ips_service.seal_preprocess(byte_data, tool=(0.6, True, True))
+            results = ips_service.seal_preprocess(byte_data, return_seal_image=True, return_ocr_text=True, tool=(0.6, True, True))
             if not results:
                 st.info("没有检测到任何印章.")
                 return
             end = time()
             elapsed1 = end - start
             for res in results:
+                st.image(ips_service.base64_to_pil(res['seal_image_base64']))
                 st.write(res["ocr_result"])
                 st.divider()
             st.info(f"提取花费：***{elapsed1}***s")

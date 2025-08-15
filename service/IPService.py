@@ -1,8 +1,10 @@
 import base64
+import io
 import os
 from typing import Tuple, List, Dict
 
 import requests
+from PIL import Image
 
 
 class IPService:
@@ -95,7 +97,7 @@ class IPService:
     def convert_idcard_type(self, idcard_code):
         """
         将印章类型编码转换为中文描述
-        :param seal_code: 印章类型编码（整数 1 或 2）
+        :param idcard_code: 印章类型编码（整数 1 或 2）
         :return: 对应的中文描述字符串
         """
         seal_type_mapping = {
@@ -103,3 +105,17 @@ class IPService:
             2: "背面"
         }
         return seal_type_mapping.get(idcard_code, "未知类型")
+
+    def base64_to_pil(self, base64_str):
+        # 1. 去除Base64前缀（如"data:image/png;base64,"）
+        if "," in base64_str:
+            base64_str = base64_str.split(",")[1]
+
+        # 2. 解码Base64为字节数据
+        image_bytes = base64.b64decode(base64_str)
+
+        # 3. 通过BytesIO将字节数据转换为PIL.Image对象
+        image = Image.open(io.BytesIO(image_bytes))
+
+        # 4. 可选：确保输出为RGB格式（避免透明通道问题）
+        return image.convert("RGB")
