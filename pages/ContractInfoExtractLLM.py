@@ -1,4 +1,5 @@
 import json
+from time import time
 
 import streamlit as st
 
@@ -52,6 +53,7 @@ def main():
                 print(select_doc)
                 args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc,
                         'returnOcrText': 1, 'returnLLMThink': 1}
+                start = time()
                 valid_result = requests.post(os.getenv("CONTRACT_EXTRACT_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
                 print(valid_data)
@@ -71,6 +73,9 @@ def main():
             if button:
                 st.info("提取结果")
                 st.write(valid_data.get("data", {}).get("result", ""))
+                end = time()
+                elapsed = end - start
+                st.info(f"处理花费时间：***{elapsed}***s")
 
 
 if __name__ == '__main__':

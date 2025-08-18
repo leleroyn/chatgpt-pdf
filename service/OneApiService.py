@@ -40,7 +40,7 @@ class OneApiService:
         {question}
         # 你要处理的问题：
         - 请先整理文件内容，然后判断是否是营业执照。
-        - 如果是返回json：{{"code":200,"name":"企业名称","orgCode":"统一社会信用代码","businessType":"企业类型","person":"法定代表人","address":"住所","capital":"注册金额(单位：万元)","createDate":"成立日期","period":"营业期限(若无返回空)","business":"经营范围"}}。
+        - 如果是返回json：{{"code":200,"name":"企业名称","orgCode":"统一社会信用代码","businessType":"企业类型","person":"法定代表人","address":"住所","capital":"注册金额","createDate":"成立日期","period":"营业期限(若无返回空)","business":"经营范围"}}。
         - 如果不是返回json：{{"code":500,"message":"原因"}}。
         # 在回答时，请注意以下几点：        
         - 切记不要返回任何多余的内容！

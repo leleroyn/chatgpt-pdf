@@ -1,4 +1,5 @@
 import json
+from time import time
 
 import streamlit as st
 
@@ -44,12 +45,11 @@ def main():
                 files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
                 r = requests.post(url, files=files)
                 data = json.loads(r.text)
-                print(data)
                 file_dfs_url = data["map"]["privateUrl"]
                 select_seal = [1 if color == "红色圆章" else 2 if color == "灰色圆章" else None for color in
                                seal_options]
                 select_doc = 1 if doc_options == "合同" else 2 if doc_options == "身份证" else 3 if doc_options == "营业执照" else 4 if doc_options == "发票" else None
-                print(select_doc)
+                start = time()
                 args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc,
                         'returnOcrText': 1, 'returnLLMThink': 1}
                 valid_result = requests.post(os.getenv("CONTRACT_VALID_URL"), json=args)
@@ -74,6 +74,9 @@ def main():
                     ("✔️" if valid_data.get("data", {}).get("result", "") == 1 else "❌",
                      valid_data.get("data", {}).get(
                          "reason", "")))
+                end = time()
+                elapsed = end - start
+                st.info(f"处理花费时间：***{elapsed}***s")
 
 
 if __name__ == '__main__':
