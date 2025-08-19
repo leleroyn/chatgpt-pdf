@@ -30,7 +30,7 @@ def main():
             byte_stream = io.BytesIO()
             image.save(byte_stream, format='PNG')
             byte_data = byte_stream.getvalue()
-            results = ips_service.seal_preprocess(byte_data, return_seal_image=True,return_ocr_text=False, tool=(0.6, False, False))
+            results = ips_service.seal_preprocess(byte_data, return_seal_image=True,return_ocr_text=False, tool=(0.6, True, True))
             if not results:
                 st.info("没有检测到任何印章.")
                 return
