@@ -31,7 +31,7 @@ def main():
                 image.save(byte_stream, format='PNG')
                 byte_data = byte_stream.getvalue()
                 start = time()
-                results = ips_service.invoice_preprocess(byte_data, return_corp_image=False, return_ocr_text=True, tool=(conf_size, True, True))
+                results = ips_service.invoice_preprocess(byte_data, return_corp_image=False, return_ocr_text=True, tool=(conf_size, True, False))
                 if not results:
                     st.info("没有检测到任何发票.")
                     return

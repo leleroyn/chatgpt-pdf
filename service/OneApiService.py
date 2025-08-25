@@ -29,7 +29,7 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],
+            ],temperature=0.1, top_p=0.95,
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -54,7 +54,7 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],
+            ],temperature=0.1, top_p=0.95,
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -72,7 +72,7 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],
+            ],temperature=0.1, top_p=0.95,
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -120,7 +120,7 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],
+            ], temperature=0.1, top_p=0.95,
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content

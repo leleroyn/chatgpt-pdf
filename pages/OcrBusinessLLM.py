@@ -29,7 +29,7 @@ def main():
             byte_data = byte_stream.getvalue()
             start = time()
             results = ips_service.bizlic_preprocess(byte_data, return_corp_image=False, return_ocr_text=True,
-                                                     tool=(conf_size, True, True))
+                                                     tool=(conf_size, True, False))
             if not results:
                 st.info("没有检测到任何营业执照.")
                 return

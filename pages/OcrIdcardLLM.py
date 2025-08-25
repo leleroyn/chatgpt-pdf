@@ -30,7 +30,7 @@ def main():
                 byte_data = byte_stream.getvalue()
                 start = time()
                 results = ips_service.idcard_preprocess(byte_data, return_ocr_text=True, return_corp_image=True,
-                                                        tool=(conf_size, True, True))
+                                                        tool=(conf_size, True, False))
                 if not results:
                     st.info("没有检测到任何身份证.")
                     return
