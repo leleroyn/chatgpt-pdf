@@ -1,9 +1,12 @@
 import io
+import os
 from base64 import b64decode
 from time import time
 
 import cv2
 import streamlit as st
+from PIL import Image
+from dotenv import load_dotenv
 
 from service import *
 from service.IPService import IPService
@@ -31,7 +34,7 @@ def main():
                 image.save(byte_stream, format='PNG')
                 byte_data = byte_stream.getvalue()
                 start = time()
-                results = ips_service.invoice_preprocess(byte_data, return_corp_image=False, return_ocr_text=True, tool=(conf_size, True, False))
+                results = ips_service.invoice_preprocess(byte_data, return_corp_image=True, return_ocr_text=True, tool=(conf_size, True, False))
                 if not results:
                     st.info("没有检测到任何发票.")
                     return
@@ -39,6 +42,10 @@ def main():
                 elapsed1 = end - start
                 ocr_result = []
                 for res in results:
+                    image_bytes = b64decode(res["corp_image_base64"])
+                    image_stream = io.BytesIO(image_bytes)  # 字节流转为内存文件对象
+                    image = Image.open(image_stream)
+                    st.image(image)
                     st.info(f"检测到发票，类型:***{ips_service.convert_invoice_type(res['invoice_type'])}*** | 置信值:{res['confidence']}")
                     ocr_result.append(res["ocr_text"])
                 ocr_text = "\\n".join(ocr_result)
@@ -48,9 +55,9 @@ def main():
                 oneApiService = OneApiService(llm)
                 res = oneApiService.ocr_invoice_llm(ocr_text)
                 end = time()
-                elapsed3 = end - start
+                elapsed2 = end - start
                 st.write(res)
-                st.info(f"检测花费：***{elapsed1}***s | 提取花费：***{elapsed3}***s")
+                st.info(f"检测花费：***{elapsed1}***s | 提取花费：***{elapsed2}***s")
 
 
 if __name__ == '__main__':
