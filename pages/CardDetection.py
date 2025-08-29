@@ -19,7 +19,12 @@ def main():
     with head_col[0]:
         uploaded_file = st.file_uploader("上传卡片图像", type=["png", "jpg", "jpeg", "bmp"])
     with head_col[1]:
-        return_corp_image = st.checkbox('返回裁剪图像', value=False, help="是否返回检测到的卡片裁剪图像")
+        return_corp_image = st.checkbox('返回裁剪图像', value=True, help="是否返回检测到的卡片裁剪图像")
+    
+    # Initialize variables
+    result = None
+    elapsed_time = 0
+    ips_service = None
     
     # Main content columns
     columns = st.columns(2)
@@ -28,7 +33,9 @@ def main():
         with columns[0]:
             st.markdown("### 📷 原始图像")
             image = Image.open(uploaded_file)
-            st.image(image, caption="上传的图像")
+            # Hide original image by default, show in expander
+            with st.expander("查看原始图像"):
+                st.image(image, caption="上传的图像")
         
         with columns[1]:
             st.markdown("### 📊 检测结果")
@@ -94,7 +101,8 @@ def main():
                     st.exception(e)
         
         # Display cropped image and detailed information in a new row below
-        if uploaded_file is not None and 'result' in locals() and result:
+        # Check if result exists and has sufficient confidence
+        if result and uploaded_file is not None:
             card_info = result.get('card_info', {})
             confidence = card_info.get('confidence', 0)
             
@@ -110,8 +118,12 @@ def main():
                     if return_corp_image and result.get('corp_image_base64'):
                         st.markdown("### 🎯 检测区域")
                         try:
+                            # Initialize service again for this section
+                            ips_service = IPService()
                             cropped_image = ips_service.base64_to_pil(result['corp_image_base64'])
-                            st.image(cropped_image, caption="检测到的卡片区域", use_column_width=True)
+                            # Hide cropped image by default, show in expander
+                            with st.expander("查看检测区域", expanded=False):
+                                st.image(cropped_image, caption="检测到的卡片区域", use_column_width=True)
                         except Exception as e:
                             st.error(f"无法显示裁剪图像: {str(e)}")
                     else:
@@ -121,6 +133,9 @@ def main():
                     # Display detailed results in expandable section
                     st.markdown("### 📋 详细信息")
                     with st.expander("查看详细检测数据", expanded=True):
+                        # Initialize service again for this section
+                        if ips_service is None:
+                            ips_service = IPService()
                         card_info = result.get('card_info', {})
                         card_type = card_info.get('card_type', 0)
                         confidence = card_info.get('confidence', 0)

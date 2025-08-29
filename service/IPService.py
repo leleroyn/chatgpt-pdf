@@ -11,6 +11,8 @@ class IPService:
     def seal_preprocess(self, image_bytes, return_seal_image: bool = True, return_ocr_text: bool = True,
                         tool: Tuple[float, bool, bool] = (0.5, True, True)) -> List[Dict]:
         API_URL = os.getenv("IPS_SEAL_PREPROCESS")  # 服务URL
+        if not API_URL:
+            raise ValueError("IPS_SEAL_PREPROCESS environment variable not set")
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
@@ -32,6 +34,8 @@ class IPService:
     def invoice_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = True,
                            tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
         API_URL = os.getenv("IPS_INVOICE_PREPROCESS")  # 服务URL
+        if not API_URL:
+            raise ValueError("IPS_INVOICE_PREPROCESS environment variable not set")
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
@@ -53,6 +57,8 @@ class IPService:
     def idcard_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = False,
                           tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
         API_URL = os.getenv("IPS_IDCARD_PREPROCESS")  # 服务URL
+        if not API_URL:
+            raise ValueError("IPS_IDCARD_PREPROCESS environment variable not set")
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
@@ -74,6 +80,8 @@ class IPService:
     def bizlic_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = True,
                           tool: Tuple[float, bool, bool] = (0.8, True, False)) -> List[Dict]:
         API_URL = os.getenv("IPS_BIZLIC_PREPROCESS")  # 服务URL
+        if not API_URL:
+            raise ValueError("IPS_BIZLIC_PREPROCESS environment variable not set")
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
@@ -83,6 +91,29 @@ class IPService:
                      "resize": tool[1],
                      "back_ground": tool[2]
                      }
+        }
+        # 调用API
+        response = requests.post(API_URL, json=payload)
+        # 处理接口返回数据
+        if response.status_code != 200:
+            error_msg = f"IPS服务调用失败！状态码：{response.status_code}，响应：{response.text[:500]}"
+            raise ConnectionError(error_msg)  # 触发可捕获的异常
+        return response.json()
+
+    def card_det(self, image_bytes, return_corp_image: bool = True) -> Dict:
+        """
+        Card detection method that calls the /ips/api/v2/card/det endpoint
+        :param image_bytes: The image data as bytes
+        :param return_corp_image: Whether to return the cropped image
+        :return: Dictionary containing corp_image_base64, card_info, and fork status
+        """
+        API_URL = os.getenv("IPS_CARD_DET")  # 服务URL
+        if not API_URL:
+            raise ValueError("IPS_CARD_DET environment variable not set")
+        image_data = base64.b64encode(image_bytes).decode("utf-8")
+        payload = {
+            "image_base64": image_data,
+            "return_corp_image": return_corp_image
         }
         # 调用API
         response = requests.post(API_URL, json=payload)
@@ -133,10 +164,23 @@ class IPService:
         :return: 对应的中文描述字符串
         """
         seal_type_mapping = {
-            1: "正面",
-            2: "背面"
+            1: "身份证"
         }
         return seal_type_mapping.get(idcard_code, "未知类型")
+
+    def convert_card_type(self, card_type_code):
+        """
+        将卡片类型编码转换为中文描述
+        :param card_type_code: 卡片类型编码（0-其它，1-身份证，2-营业执照，3-发票）
+        :return: 对应的中文描述字符串
+        """
+        card_type_mapping = {
+            0: "其它",
+            1: "身份证",
+            2: "营业执照",
+            3: "发票"
+        }
+        return card_type_mapping.get(card_type_code, "未知类型")
 
     def base64_to_pil(self, base64_str):
         # 1. 去除Base64前缀（如"data:image/png;base64,"）
