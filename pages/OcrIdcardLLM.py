@@ -70,8 +70,9 @@ def main():
                     end = time()
                     elapsed1 = end - start
                     
-                    # Display detection information
+                    # Display detection summary information only
                     ocr_result = []
+                    valid_results_count = 0
                     
                     for i, res in enumerate(results):
                         confidence = res['confidence']
@@ -79,10 +80,11 @@ def main():
                         
                         # Only show results above confidence threshold
                         if confidence >= conf_size:
-                            st.success(f"检测到身份证 #{i+1}")
+                            st.success(f"检测到身份证 #{valid_results_count+1}")
                             st.markdown(f"**类型**: {idcard_type}")
                             st.markdown(f"**置信值**: {confidence:.2f}")
                             ocr_result.append(res["ocr_text"])
+                            valid_results_count += 1
                             st.divider()
                         else:
                             st.warning(f"检测到身份证 #{i+1} (置信值: {confidence:.2f}) - 低于阈值被过滤")
@@ -90,9 +92,9 @@ def main():
                     if not ocr_result:
                         st.info("所有检测结果的置信度均低于阈值。请尝试降低置信度阈值。")
                         return
-            
-            # Tier 2: Separator line
-            st.markdown("---")
+                    
+                    # Show summary statistics
+                    st.info(f"共检测到 {valid_results_count} 个有效身份证")
             
             # Tier 3: Detailed information at the bottom
             st.subheader("详细信息提取")
@@ -104,55 +106,53 @@ def main():
             with st.spinner("正在提取身份证信息..."):
                 start = time()
                 oneApiService = OneApiService(llm)
-                res = oneApiService.ocr_idcard_llm(ocr_text)
+                llm_result = oneApiService.ocr_idcard_llm(ocr_text)
                 end = time()
                 elapsed3 = end - start
             
-            # Display LLM results (prioritized content)
-            st.markdown("#### 🎯 AI提取结果")
-            if res:
-                try:
-                    # Try to parse as JSON
-                    parsed_result = json.loads(res)
-                    st.json(parsed_result)
-                except json.JSONDecodeError:
-                    # If not JSON, display as text
-                    st.text_area("LLM提取结果", res, height=300, key="llm_result")
-            else:
-                st.warning("LLM服务未返回结果，请检查服务配置。")
+            # Create two-column layout for detailed information
+            # Left column: Detection details, Right column: AI extracted results
+            detail_col1, detail_col2 = st.columns(2)
             
-            # Display OCR text in an expander to save space
-            with st.expander("🔍 查看OCR识别详情"):
-                st.text_area("OCR识别结果", ocr_text, height=200, key="ocr_text")
-            
-            # Display detection details with cropped images (avoiding nested expanders)
-            st.markdown("#### 📋 检测详情")
-            tabs = st.tabs([f"身份证 #{i+1}" for i in range(len([r for r in results if r['confidence'] >= conf_size]))])
-            
-            valid_result_index = 0
-            for i, res in enumerate(results):
-                confidence = res['confidence']
-                if confidence >= conf_size:
-                    with tabs[valid_result_index]:
-                        st.markdown(f"**类型**: {ips_service.convert_idcard_type(res['idcard_type'])}")
-                        st.markdown(f"**置信值**: {confidence:.2f}")
+            with detail_col1:
+                # Display OCR text in an expander to save space
+                with st.expander("🔍 查看OCR识别详情"):
+                    st.text_area("OCR识别结果", ocr_text, height=200, key="ocr_text")
+                
+                # Display detection details with cropped images (avoiding nested expanders)
+                st.markdown("#### 📋 检测详情")
+                tabs = st.tabs([f"身份证 #{i+1}" for i in range(len([r for r in results if r['confidence'] >= conf_size]))])
+                
+                valid_result_index = 0
+                for i, res in enumerate(results):
+                    confidence = res['confidence']
+                    if confidence >= conf_size:
+                        with tabs[valid_result_index]:
+                            st.markdown(f"**类型**: {ips_service.convert_idcard_type(res['idcard_type'])}")
+                            st.markdown(f"**置信值**: {confidence:.2f}")
+                            
+                            # Display cropped image (hidden by default)
+                            try:
+                                cropped_image = ips_service.base64_to_pil(res['corp_image_base64'])
+                                with st.expander("查看裁剪图像"):
+                                    st.image(cropped_image, caption=f"裁剪图像 #{i+1}", use_column_width=True)
+                            except Exception as e:
+                                st.warning(f"无法显示裁剪图像: {str(e)}")
+                            
+                            # Removed redundant OCR text display to avoid duplication
+                            # The combined OCR text is already shown in the "查看OCR识别详情" expander above
                         
-                        # Display cropped image
-                        try:
-                            cropped_image = ips_service.base64_to_pil(res['corp_image_base64'])
-                            st.markdown("**裁剪图像**:")
-                            st.image(cropped_image, caption=f"裁剪图像 #{i+1}", use_column_width=True)
-                        except Exception as e:
-                            st.warning(f"无法显示裁剪图像: {str(e)}")
-                        
-                        # Display OCR text for this result
-                        st.markdown("**OCR识别文本**:")
-                        st.text_area(f"OCR文本 #{i+1}", res["ocr_text"], height=150, key=f"ocr_detail_{i+1}")
-                    
-                    valid_result_index += 1
+                        valid_result_index += 1
+            
+            with detail_col2:
+                # Display LLM results (prioritized content) on the right side
+                st.markdown("#### 🎯 AI提取结果")
+                if llm_result:
+                    st.write(llm_result)                   
+                else:
+                    st.warning("LLM服务未返回结果，请检查服务配置。")
             
             # Performance metrics
-            st.markdown("---")
             col3, col4 = st.columns(2)
             with col3:
                 st.metric("检测耗时", f"{elapsed1:.2f}s")
