@@ -140,7 +140,6 @@ def main():
                 # Display LLM results (prioritized content) on the right side
                 st.markdown("#### 🎯 AI提取结果")
                 if res:
-                                    if res:
                     st.write(res)                   
                 else:
                     st.warning("LLM服务未返回结果，请检查服务配置。")           
