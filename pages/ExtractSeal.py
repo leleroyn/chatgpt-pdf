@@ -14,7 +14,7 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="检测图片中的印章", layout="wide", menu_items={})
     
-    st.subheader("🔍检测图片中的印章")
+    st.subheader("🔎检测图片中的印章")
     
     # Create a more organized layout
     head_col1, head_col2 = st.columns([3, 1])

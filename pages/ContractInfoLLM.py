@@ -9,7 +9,7 @@ from service import *
 def main():
     load_dotenv()
     st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
-    st.subheader(f"🐋合同信息判定(OCR+llm)")
+    st.subheader(f"📋合同信息判定(OCR+llm)")
     column_head = st.columns([1, 1, 1], gap="medium")
     with column_head[0]:
         uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])

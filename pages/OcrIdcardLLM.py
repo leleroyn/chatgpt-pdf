@@ -15,7 +15,8 @@ def main():
     load_dotenv()
     llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="身份证信息提取", layout="wide", menu_items={})
-    st.subheader(f"👤 身份证信息提取(OCR+{llm})")
+
+    st.subheader(f"🆔 身份证信息提取(OCR+{llm})")
     
     # Create a more organized layout
     head_col1, head_col2 = st.columns([3, 1])

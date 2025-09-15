@@ -16,7 +16,7 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="印章提取(Paddle)", layout="wide", menu_items={})
     
-    st.subheader("🔮印章提取(Paddle)")
+    st.subheader("🔴印章提取(Paddle)")
     
     # Create a more organized layout
     head_col1, head_col2 = st.columns([3, 1])
