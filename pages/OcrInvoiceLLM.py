@@ -139,8 +139,9 @@ def main():
             with detail_col2:
                 # Display LLM results (prioritized content) on the right side
                 st.markdown("#### 🎯 AI提取结果")
-                if res:
-                    st.write(res)                   
+                if ocr_text:
+                    llm_result = oneApiService.ocr_invoice_llm(ocr_text)
+                    st.write(llm_result)                   
                 else:
                     st.warning("LLM服务未返回结果，请检查服务配置。")           
             
