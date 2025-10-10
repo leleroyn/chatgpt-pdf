@@ -10,7 +10,7 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="合同关键信息抽取", layout="wide", menu_items={})
     st.subheader(f"🔍合同关键信息抽取(OCR+llm)")
-    column_head = st.columns([1, 1, 1], gap="medium")
+    column_head = st.columns([1, 1, 1,1], gap="medium")
     with column_head[0]:
         uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
     with column_head[1]:
@@ -24,6 +24,11 @@ def main():
             "文档类型",
             ["合同", "身份证", "营业执照", "发票"]
         )
+    with column_head[3]:
+        usecls_options = st.selectbox(
+            "启用文本方向检测",
+            ["启用", "禁用"]
+        )   
     columns = st.columns(3, gap="medium")
     if uploaded_file is not None:
         with columns[0]:
@@ -51,7 +56,7 @@ def main():
                                seal_options]
                 select_doc = 1 if doc_options == "合同" else 2 if doc_options == "身份证" else 3 if doc_options == "营业执照" else 4 if doc_options == "发票" else None
                 print(select_doc)
-                args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc,
+                args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc, "useCls": 1 if usecls_options == "启用" else 0,
                         'returnOcrText': 1, 'returnLLMThink': 1}
                 start = time()
                 valid_result = requests.post(os.getenv("CONTRACT_EXTRACT_URL"), json=args)
