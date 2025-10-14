@@ -74,7 +74,7 @@ def main():
                                 image_bytes = b64decode(res["seal_image_base64"])
                                 image_stream = io.BytesIO(image_bytes)
                                 seal_image = Image.open(image_stream)
-                                st.image(seal_image, caption=f"印章图像 #{item}", use_column_width=True)
+                                st.image(seal_image, caption=f"印章图像 #{item}")
                             except Exception as e:
                                 st.warning(f"无法显示印章图像: {str(e)}")
                             
