@@ -1,3 +1,4 @@
+from base64 import b64decode
 import io
 import re
 from time import time
@@ -82,11 +83,14 @@ def main():
                     # Display detection information
                     for i, res in enumerate(results):
                         confidence = res['confidence']
-                        seal_type = ips_service.convert_seal_type(res['seal_type'])
-                        
+                        seal_type = ips_service.convert_seal_type(res['seal_type'])                      
                         # Only show results above confidence threshold
                         if confidence >= conf_size:
                             with st.expander(f"检测到印章 #{i+1} - {seal_type} (置信值: {confidence:.2f})", expanded=True):
+                                image_bytes = b64decode(res["seal_image_base64"])
+                                image_stream = io.BytesIO(image_bytes)
+                                seal_image = Image.open(image_stream)
+                                st.image(seal_image)
                                 # Display OCR result if available
                                 if "ocr_result" in res:
                                     # Clean the OCR result

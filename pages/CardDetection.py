@@ -64,10 +64,10 @@ def main():
                         fork_status = result.get('fork', False)
                         
                         # Check confidence threshold - hide results if below 0.8
-                        if confidence < 0.8:
-                            st.warning(f"⚠️ 检测置信度过低 ({confidence:.3f} < 0.8)，检测结果不可靠")
-                            st.info("💡 建议：请尝试上传更清晰、光线更好的图像")
-                            return
+                        #if confidence < 0.8:
+                        #    st.warning(f"⚠️ 检测置信度过低 ({confidence:.3f} < 0.8)，检测结果不可靠")
+                        #    st.info("💡 建议：请尝试上传更清晰、光线更好的图像")
+                        #    return
                         
                         # Convert card type to Chinese description
                         card_type_desc = ips_service.convert_card_type(card_type)
