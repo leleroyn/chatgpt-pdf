@@ -1,0 +1,85 @@
+# Linux 环境依赖文件
+# 适用于 Python 3.11+
+
+# 向量数据库
+qdrant-client>=1.6.0,<1.10.0
+
+# Web框架和HTTP
+streamlit==1.25.0
+aiohttp==3.8.4
+aiosignal==1.3.1
+httpx==0.28.1
+requests==2.31.0
+
+# AI和机器学习
+torch==2.1.0
+torchvision==0.16.0
+transformers==4.32.0
+sentence-transformers==2.2.2
+huggingface-hub==0.34.3
+
+# 数据处理和分析
+numpy==1.26.4
+pandas==2.0.3
+scipy==1.11.2
+scikit-learn==1.3.0
+
+# 图像处理
+opencv-python==4.8.0.76
+pillow==9.5.0
+
+# PDF处理
+pymupdf==1.23.5
+pdfplumber==0.9.0
+pdf2image==1.16.3
+pdfminer-six==20221105
+
+# OCR相关
+rapidocr-onnxruntime==1.4.4
+rapid-orientation==0.0.8
+
+# 文档处理
+python-docx==0.8.11
+python-pptx==0.6.21
+openpyxl==3.1.2
+
+# 配置和环境
+python-dotenv==1.0.0
+click==8.1.4
+colorama==0.4.6
+
+# 工具和工具包
+tenacity==8.2.2
+tqdm==4.67.1
+loguru==0.7.3
+rich==13.4.2
+
+# 数据序列化
+pydantic==2.10.6
+pydantic-core==2.27.2
+pyyaml==6.0
+
+# 网络和异步
+anyio==4.8.0
+frozenlist==1.4.0
+multidict==6.0.4
+yarl==1.9.2
+
+# 其他工具
+filelock==3.12.2
+psutil==7.0.0
+
+# 移除Windows特定依赖，添加Linux兼容依赖
+# 注意：以下Windows特定依赖已移除：
+# - comtypes==1.2.0
+# - pypiwin32==223
+# - pywin32==311
+# - pyreadline3==3.4.1
+# - win32-setctime==1.2.0
+
+# Linux系统依赖（可能需要系统包管理器安装）
+# Ubuntu/Debian: sudo apt-get install libgl1 libglib2.0-0
+# CentOS/RHEL: sudo yum install mesa-libGL libglib2.0
+
+# 安装命令：
+# pip install -r requirements-linux.txt

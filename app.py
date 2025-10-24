@@ -15,7 +15,8 @@ def main():
             Page("pages/OcrBusinessLLM.py", "营业执照信息提取(OCR+LLM)⭐️", "🏢"),
             Page("pages/OcrInvoiceLLM.py", "发票信息提取(OCR+LLM)⭐️", "🧾"),
             Page("pages/ContractInfoLLM.py", "合同信息判定(OCR+LLM)", "📋"),
-            Page("pages/ContractInfoExtractLLM.py", "合同关键信息抽取(OCR+LLM)", "🔍"),           
+            Page("pages/ContractInfoExtractLLM.py", "合同关键信息抽取(OCR+LLM)", "🔍"),
+            Page("pages/CompanyVectorDB.py", "公司名向量库", "🏢"),           
         ]
     )
 
