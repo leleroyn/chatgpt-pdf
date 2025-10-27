@@ -61,6 +61,29 @@ class SmartQAKB:
             st.warning(f"清空知识库失败: {str(e)}")
             return True
     
+    def clear_knowledge_base(self):
+        """清空知识库内容"""
+        try:
+            collections = self.vector_db_service.qdrant_client.get_collections().collections
+            collection_names = [collection.name for collection in collections]
+            
+            if self.kb_name in collection_names:
+                # 删除集合内所有点
+                from qdrant_client.models import Filter
+                self.vector_db_service.qdrant_client.delete(
+                    collection_name=self.kb_name,
+                    points_selector=Filter()
+                )
+                st.success(f"知识库 '{self.kb_name}' 内容已清空")
+                return True
+            else:
+                st.info(f"知识库 '{self.kb_name}' 不存在，无需清空")
+                return False
+                
+        except Exception as e:
+            st.error(f"清空知识库失败: {str(e)}")
+            return False
+    
     def process_uploaded_file(self, uploaded_file):
         """处理上传的文件，进行OCR识别"""
         file_extension = uploaded_file.name.split('.')[-1].lower()
@@ -109,10 +132,11 @@ def main():
     st.set_page_config(page_title="智能问答(Simple_KB)", layout="wide", menu_items={})
     st.subheader(f"🤖 智能问答(Simple_KB)")
     
-    # 初始化应用
-    if 'qa_system' not in st.session_state:
-        st.session_state.qa_system = SmartQAKB()
+    # 清除所有会话状态，确保每次打开都是新的
+    st.session_state.clear()
     
+    # 初始化应用
+    st.session_state.qa_system = SmartQAKB()
     qa_system = st.session_state.qa_system
     
     # 初始化知识库
@@ -128,12 +152,9 @@ def main():
     except:
         has_content = False
     
-    # 文件上传区域
-    with st.expander("上传文档文件", expanded=not has_content):
-        uploaded_file = st.file_uploader("选择文件", type=["jpg", "jpeg", "png", "bmp", "pdf"])
-        
-        if uploaded_file:
-            st.success(f"已上传: {uploaded_file.name}")
+    # 初始化上传文件变量到会话状态
+    if 'uploaded_file' not in st.session_state:
+        st.session_state.uploaded_file = None
     
     # 创建三列布局
     col1, col2, col3 = st.columns(3, gap="medium")
@@ -143,57 +164,15 @@ def main():
         st.divider()
         
         # 如果有内容但没有上传文件，显示直接提问区域
-        if has_content and uploaded_file is None:
+        if has_content and st.session_state.uploaded_file is None:
             st.success("💡 知识库已有内容，您可以直接提问")
         
         # 显示问答区域
         user_input = st.text_area(
-            label="请输入您的问题",            
+            label="请输入您的问题", 
+            placeholder="总结知识库的主要内容.",           
             height=100
         )
-        
-        # 处理按钮
-        if uploaded_file:
-            if st.button("重建知识库", type="primary"):
-                with st.spinner("正在重建知识库..."):
-                    try:
-                        # 清空现有知识库
-                        qa_system.clear_knowledge_base()
-                        
-                        # 重新初始化服务
-                        st.session_state.qa_system.vector_db_service = VectorDBService()
-                        qa_system = st.session_state.qa_system
-                        
-                        # OCR识别
-                        ocr_text = qa_system.process_uploaded_file(uploaded_file)
-                        
-                        if not ocr_text.strip():
-                            st.error("OCR识别失败或未识别到文本内容")
-                            return
-                        
-                        st.success(f"OCR识别完成，识别到 {len(ocr_text)} 个字符")
-                        
-                        # 文本分块
-                        text_chunks = qa_system.chunk_text(ocr_text)
-                        st.success(f"文本分块完成，共 {len(text_chunks)} 个块")
-                        
-                        # 存储到知识库
-                        document_id = f"doc_{int(time())}"
-                        stored_count = qa_system.store_in_knowledge_base(text_chunks, document_id)
-                        st.success(f"知识库构建完成，存储了 {stored_count} 个文本块")
-                        
-                        # 保存处理状态
-                        st.session_state.knowledge_base = {
-                            'document_id': document_id,
-                            'ocr_text': ocr_text,
-                            'chunk_count': len(text_chunks),
-                            'kb_name': qa_system.kb_name
-                        }
-                        
-                        st.experimental_rerun()
-                        
-                    except Exception as e:
-                        st.error(f"处理文件时出错: {str(e)}")
         
         # 智能问答按钮
         if st.button("智能问答", type="secondary"):
@@ -203,13 +182,77 @@ def main():
             
             with st.spinner("正在查询知识库..."):
                 try:
-                    search_results = qa_system.search_knowledge_base(user_input, top_k=3)
+                    search_results = qa_system.search_knowledge_base(user_input, top_k=6)
                     st.session_state.search_results = search_results
                     st.session_state.user_query = user_input
                     st.success(f"找到 {len(search_results)} 个相关文本块")
                     
                 except Exception as e:
                     st.error(f"查询时出错: {str(e)}")
+        
+        # 知识库管理按钮 - 放在智能问答按钮后面，避免误点
+        st.divider()
+        with st.expander("知识库管理", expanded=False):
+            # 文件上传区域 - 整合到知识库管理
+            uploaded_file = st.file_uploader("上传文档文件", type=["jpg", "jpeg", "png", "bmp", "pdf"])
+            
+            if uploaded_file:
+                st.session_state.uploaded_file = uploaded_file
+                st.success(f"已上传: {uploaded_file.name}")
+            
+            # 创建两列布局放置知识库管理按钮
+            col_update, col_delete = st.columns(2)
+            
+            with col_update:
+                # 更新知识库按钮
+                if st.session_state.uploaded_file:
+                    if st.button("更新知识库", type="primary", help="向知识库添加新文档，不清空现有内容"):
+                        with st.spinner("正在更新知识库..."):
+                            try:
+                                # OCR识别
+                                ocr_text = qa_system.process_uploaded_file(st.session_state.uploaded_file)
+                                
+                                if not ocr_text.strip():
+                                    st.error("OCR识别失败或未识别到文本内容")
+                                    return
+                                
+                                st.success(f"OCR识别完成，识别到 {len(ocr_text)} 个字符")
+                                
+                                # 文本分块
+                                text_chunks = qa_system.chunk_text(ocr_text)
+                                st.success(f"文本分块完成，共 {len(text_chunks)} 个块")
+                                
+                                # 存储到知识库
+                                document_id = f"doc_{int(time())}"
+                                stored_count = qa_system.store_in_knowledge_base(text_chunks, document_id)
+                                st.success(f"知识库更新完成，新增了 {stored_count} 个文本块")
+                                
+                                # 保存处理状态
+                                st.session_state.knowledge_base = {
+                                    'document_id': document_id,
+                                    'ocr_text': ocr_text,
+                                    'chunk_count': len(text_chunks),
+                                    'kb_name': qa_system.kb_name
+                                }
+                                
+                                st.experimental_rerun()
+                                
+                            except Exception as e:
+                                st.error(f"处理文件时出错: {str(e)}")
+            
+            with col_delete:
+                # 清空知识库按钮
+                if st.button("清空知识库", type="secondary", help="清空知识库所有内容但保留集合结构"):
+                    with st.spinner("正在清空知识库..."):
+                        try:
+                            if qa_system.clear_knowledge_base():
+                                st.session_state.clear()
+                                st.session_state.qa_system = SmartQAKB()  # 重新初始化
+                                st.experimental_rerun()
+                            else:
+                                st.error("清空知识库失败")
+                        except Exception as e:
+                            st.error(f"清空操作出错: {str(e)}")
     
     # 中间列：搜索结果
     with col2:
@@ -217,21 +260,19 @@ def main():
         
         # 显示OCR原始文本（如果有新上传的文档）
         if 'knowledge_base' in st.session_state:
-            st.info("文档内容预览")
-            ocr_text_preview = st.session_state.knowledge_base['ocr_text'][:500] + "..." if len(st.session_state.knowledge_base['ocr_text']) > 500 else st.session_state.knowledge_base['ocr_text']
-            st.text_area(
-                label="原始文本预览",
-                value=ocr_text_preview,
-                height=200,
-                disabled=True
-            )
+            st.success(f"已处理文档: {len(st.session_state.knowledge_base['ocr_text'])} 字符, {st.session_state.knowledge_base['chunk_count']} 个文本块")
         
         # 显示搜索结果
         if 'search_results' in st.session_state:
             st.info("检索到的相关信息")
             for i, result in enumerate(st.session_state.search_results):
                 with st.expander(f"相关文本块 {i+1} (相似度: {result['score']:.3f})"):
-                    st.text(result['text'])
+                    st.text_area(
+                        label=f"文本内容 {i+1}",
+                        value=result['text'],
+                        height=150,
+                        disabled=True
+                    )
     
     # 右侧列：大模型回答
     with col3:
@@ -272,12 +313,7 @@ def main():
                     )
                     
                     if llm_response:
-                        st.text_area(
-                            label="分析结果",
-                            value=llm_response,
-                            height=200,
-                            disabled=False
-                        )
+                        st.markdown(llm_response)
                     else:
                         st.warning("大模型服务暂时不可用，请稍后重试")
                         

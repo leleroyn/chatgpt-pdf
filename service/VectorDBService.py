@@ -21,8 +21,8 @@ class VectorDBService:
         # 固定知识库名称
         self.collection_name = "Simple_KB"
         
-        # 固定向量维度为768
-        self.vector_size = 768
+        # 固定向量维度为512
+        self.vector_size = int(os.getenv("EMBEDDING_MODEL_DIM", 512))
         
         # 加载嵌入模型
         self._load_embedding_model()
@@ -228,25 +228,127 @@ class VectorDBService:
         except Exception as e:
             return {"error": str(e)}
     
-    def chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
-        """将文本分块"""
+    def chunk_text(self, text: str, chunk_size: int = 1000, overlap: int = 200) -> List[str]:
+        """
+        优化文本分块策略，防止信息割裂
+        
+        Args:
+            text: 输入文本
+            chunk_size: 块大小（默认1000字符，支持长序列）
+            overlap: 重叠大小（默认200字符）
+            
+        Returns:
+            分块后的文本列表
+        """
+        if not text.strip():
+            return []
+            
         if len(text) <= chunk_size:
             return [text]
         
+        # 尝试按句子分割，保持语义完整性
+        import re
+        
+        # 句子分割模式（支持中文和英文标点）
+        sentence_pattern = r'[。！？.!?\n]+'
+        sentences = re.split(sentence_pattern, text)
+        
+        # 过滤空句子
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        if not sentences:
+            # 如果没有明显的句子边界，回退到字符级分块
+            return self._chunk_by_characters(text, chunk_size, overlap)
+        
+        chunks = []
+        current_chunk = ""
+        
+        for sentence in sentences:
+            # 如果当前句子加上当前块超过块大小，保存当前块
+            if len(current_chunk) + len(sentence) + 1 > chunk_size:
+                if current_chunk:
+                    chunks.append(current_chunk)
+                    # 设置重叠：取当前块的最后overlap个字符作为下一块的开头
+                    current_chunk = current_chunk[-overlap:] if len(current_chunk) > overlap else current_chunk
+                else:
+                    # 单个句子就超过块大小，需要分割
+                    if len(sentence) > chunk_size:
+                        sub_chunks = self._chunk_by_characters(sentence, chunk_size, overlap)
+                        chunks.extend(sub_chunks[:-1])  # 添加除最后一个外的所有块
+                        current_chunk = sub_chunks[-1]  # 最后一个块作为下一块的开始
+                    else:
+                        current_chunk = sentence
+            else:
+                # 添加句子到当前块
+                if current_chunk:
+                    current_chunk += "。" + sentence
+                else:
+                    current_chunk = sentence
+        
+        # 添加最后一个块
+        if current_chunk:
+            chunks.append(current_chunk)
+        
+        # 合并过小的块
+        chunks = self._merge_small_chunks(chunks, min_size=chunk_size//3)
+        
+        return chunks
+    
+    def _chunk_by_characters(self, text: str, chunk_size: int, overlap: int) -> List[str]:
+        """字符级分块（回退方法）"""
         chunks = []
         start = 0
         
         while start < len(text):
+            # 尝试在句子边界处结束
             end = start + chunk_size
+            if end < len(text):
+                # 寻找最近的句子结束位置
+                sentence_endings = [text.rfind('。', start, end), 
+                                   text.rfind('！', start, end),
+                                   text.rfind('？', start, end),
+                                   text.rfind('.', start, end),
+                                   text.rfind('!', start, end),
+                                   text.rfind('?', start, end)]
+                
+                # 找到最近的句子结束位置
+                valid_endings = [pos for pos in sentence_endings if pos != -1]
+                if valid_endings:
+                    end = max(valid_endings) + 1  # 包含标点符号
+            
             chunk = text[start:end]
             chunks.append(chunk)
             
             # 移动起始位置，考虑重叠
-            start = end - overlap
+            start = end - overlap if end - overlap > start else end
             
             # 如果剩余文本不足一个块的大小，直接取剩余所有文本
+            if start >= len(text):
+                break
             if start + chunk_size >= len(text):
                 chunks.append(text[start:])
                 break
         
         return chunks
+    
+    def _merge_small_chunks(self, chunks: List[str], min_size: int) -> List[str]:
+        """合并过小的块"""
+        if not chunks:
+            return []
+            
+        merged_chunks = []
+        current_chunk = chunks[0]
+        
+        for i in range(1, len(chunks)):
+            if len(current_chunk) < min_size and len(current_chunk) + len(chunks[i]) <= min_size * 2:
+                # 合并小块
+                current_chunk += "。" + chunks[i]
+            else:
+                # 保存当前块，开始新块
+                merged_chunks.append(current_chunk)
+                current_chunk = chunks[i]
+        
+        # 添加最后一个块
+        merged_chunks.append(current_chunk)
+        
+        return merged_chunks
