@@ -1,6 +1,7 @@
 import os
 from io import BytesIO
 from time import time
+from datetime import datetime
 
 import streamlit as st
 from PIL import Image
@@ -114,9 +115,10 @@ class SmartQAKB:
         """将文本分块"""
         return self.vector_db_service.chunk_text(text, chunk_size, overlap)
     
-    def store_in_knowledge_base(self, text_chunks, document_id):
-        """将文本块存储到知识库"""
-        return self.vector_db_service.store_document_chunks(document_id, text_chunks)
+    def store_in_knowledge_base(self, text_chunks, document_id, file_name=None):
+        """将文本块存储到知识库，并附加文件名和时间作为元数据"""
+        metadata = {"file_name": file_name, "timestamp": int(time())} if file_name else None
+        return self.vector_db_service.store_document_chunks(document_id, text_chunks, metadata)
     
     def search_knowledge_base(self, query, top_k=5):
         """在知识库中搜索相似文本块"""
@@ -224,7 +226,7 @@ def main():
                                 
                                 # 存储到知识库
                                 document_id = f"doc_{int(time())}"
-                                stored_count = qa_system.store_in_knowledge_base(text_chunks, document_id)
+                                stored_count = qa_system.store_in_knowledge_base(text_chunks, document_id, st.session_state.uploaded_file.name)
                                 st.success(f"知识库更新完成，新增了 {stored_count} 个文本块")
                                 
                                 # 保存处理状态
@@ -266,7 +268,10 @@ def main():
         if 'search_results' in st.session_state:
             st.info("检索到的相关信息")
             for i, result in enumerate(st.session_state.search_results):
-                with st.expander(f"相关文本块 {i+1} (相似度: {result['score']:.3f})"):
+                file_name = result.get('metadata', {}).get('file_name', '未知文件')
+                timestamp = result.get('metadata', {}).get('timestamp', 0)
+                time_str = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S') if timestamp else '未知时间'
+                with st.expander(f"相关文本块 {i+1} (相似度: {result['score']:.3f}, 来源: {file_name}, 时间: {time_str})"):
                     st.text_area(
                         label=f"文本内容 {i+1}",
                         value=result['text'],
