@@ -1,5 +1,8 @@
 from io import BytesIO
 from math import fabs, sin, radians, cos
+import base64
+import os
+import requests
 
 import cv2
 import fitz
@@ -116,7 +119,9 @@ def enhance_text_clarity(pil_image,
 
 class OcrService:
     def __init__(self):
-        self.rapid_ocr = RapidOCR(use_cls=False)
+        self.api_url = os.getenv("IPS_OCR_PREPROCESS")
+        if not self.api_url:
+            raise ValueError("IPS_OCR_PREPROCESS environment variable not set")
 
     def detect_from_image_path(self, image_path):
         image = Image.open(image_path)
@@ -126,29 +131,55 @@ class OcrService:
     def detect_from_image(self, image):
         """
         识别图像文本
-        :param image:  pil 图像
-        :return:
+        :param image: PIL图像
+        :return: 识别结果列表
         """
-        image = image.convert('RGB')
-        # image = rotate_image_by_exif(image)
-        image = pil2cv(image)
-        # img_w = 1024 if image.shape[1] > 1024 else image.shape[1]
-        # image = cv2.resize(image, (img_w, int(img_w * image.shape[0] / image.shape[1])),
-        #                   interpolation=cv2.INTER_AREA)
-        image = orientation(image)
-        res, elapse = self.rapid_ocr(image)
-        result = []
-        if res is not None:
-            for i in range(len(res)):
-                result.append(res[i][1])
-        return result
+        # 将PIL图像转换为字节
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        
+        # 将图像转换为base64
+        image_base64 = base64.b64encode(img_byte_arr).decode('utf-8')
+        
+        # 调用OCR接口
+        payload = {
+            "image_base64": image_base64,
+            "return_ocr_text": True
+        }
+        
+        response = requests.post(self.api_url, json=payload)
+        
+        if response.status_code != 200:
+            raise Exception(f"OCR API调用失败，状态码: {response.status_code}, 响应: {response.text}")
+        
+        result_data = response.json()
+        
+        # 解析OCR结果
+        if result_data.get("code") == 200 or 'ocr_text' in result_data:
+            ocr_text = result_data.get("ocr_text", "")
+            # 将文本按行分割并返回
+            return [line.strip() for line in ocr_text.split('\n') if line.strip()]
+        else:
+            error_msg = result_data.get('msg', '未知错误')
+            error_details = f"API响应: {result_data}" if not result_data.get('msg') else ""
+            raise Exception(f"OCR识别失败: {error_msg}. {error_details}")
 
     def detect_from_pdf_path(self, pdf_bits):
+        """
+        处理PDF文件，将其转换为图片后调用OCR接口
+        :param pdf_bits: PDF文件的字节数据
+        :return: 包含每页识别结果的字典
+        """
         pdf_text = {}
         pdf_doc = fitz.open("pdf", pdf_bits)
-        pages = pdf_doc.pages()
-        i = 0
-        for page in pages:
+        total_pages = pdf_doc.page_count
+        
+        print(f"开始处理PDF，共 {total_pages} 页")
+        
+        for i in range(total_pages):
+            print(f"正在处理第 {i+1}/{total_pages} 页...")
+            page = pdf_doc[i]
             zoom_x = 1.33333333
             zoom_y = 1.33333333
             mat = fitz.Matrix(zoom_x, zoom_y)
@@ -157,5 +188,8 @@ class OcrService:
             img = Image.open(BytesIO(img_bits))
             result = self.detect_from_image(img)
             pdf_text[i] = (img, result)
-            i = i + 1
+            print(f"第 {i+1}/{total_pages} 页处理完成，识别到 {len(result)} 个文本块")
+        
+        pdf_doc.close()
+        print(f"PDF处理完成，共处理 {total_pages} 页")
         return pdf_text
