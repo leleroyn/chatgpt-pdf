@@ -21,36 +21,41 @@ def main():
     # Create a more organized layout
     head_col1, head_col2 = st.columns([3, 1])
     with head_col1:
-        uploaded_file = st.file_uploader("上传发票影像", type=["png", "jpg", "bmp", "jpeg"])
+        uploaded_file = st.file_uploader("上传发票影像", type=["png", "jpg", "bmp", "jpeg","pdf"])
     with head_col2:
         conf_size = st.slider('置信度阈值', min_value=0.1, max_value=1.0, step=0.1, value=0.8)
         st.caption("置信度低于阈值的结果将被过滤")
     
     if uploaded_file is not None:
         try:
-            # Load and display the image
-            image = Image.open(uploaded_file)
+            # Load the image or PDF
+            if uploaded_file.type != "application/pdf":
+                # Load the image for display only
+                image = Image.open(uploaded_file)
             
             # Create a three-tier layout as per UI preference
-            # Tier 1: Original image and core detection results
+            # Tier 1: Original file and core detection results
             col1, col2 = st.columns(2)
             
             with col1:
-                st.subheader("原始图像")
-                # Hide original image by default, show in expander
-                with st.expander("显示原始图像"):
-                    st.image(image, use_column_width=True)
+                st.subheader("原始文件")
+                # Hide original file by default, show in expander
+                with st.expander("显示原始文件"):
+                    if uploaded_file.type == "application/pdf":
+                        st.write(f"PDF 文件: {uploaded_file.name}")
+                        st.info("PDF 文件内容预览暂不支持")
+                    else:
+                        st.image(image, use_column_width=True)
             
             with col2:
                 st.subheader("检测结果")
                 with st.spinner("正在检测发票信息..."):
                     ips_service = IPService()
-                    byte_stream = io.BytesIO()
-                    image.save(byte_stream, format='PNG')
-                    byte_data = byte_stream.getvalue()
+                    byte_data = uploaded_file.getvalue()
                     
                     start = time()
-                    results = ips_service.invoice_preprocess(byte_data, return_corp_image=True, return_ocr_text=True, 
+                    file_type = "pdf" if uploaded_file.type == "application/pdf" else "image"
+                    results = ips_service.invoice_preprocess(byte_data, file_type=file_type, return_corp_image=True, return_ocr_text=True, 
                                                            tool=(conf_size, True, False))
                     
                     if not results:

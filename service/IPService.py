@@ -31,7 +31,7 @@ class IPService:
             raise ConnectionError(error_msg)  # 触发可捕获的异常
         return response.json()
 
-    def invoice_preprocess(self, image_bytes, return_corp_image: bool = True, return_ocr_text: bool = True,
+    def invoice_preprocess(self, image_bytes, file_type:str, return_corp_image: bool = True, return_ocr_text: bool = True,
                            tool: Tuple[float, bool, bool] = (0.5, True, False)) -> List[Dict]:
         API_URL = os.getenv("IPS_INVOICE_PREPROCESS")  # 服务URL
         if not API_URL:
@@ -39,6 +39,7 @@ class IPService:
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
+            "file_type": file_type,
             "return_corp_image": return_corp_image,
             "return_ocr_text": return_ocr_text,
             "tool": {"init_confidence": tool[0],
