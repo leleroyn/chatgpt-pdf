@@ -10,41 +10,57 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="合同关键信息抽取", layout="wide", menu_items={})
     st.subheader(f"🔍合同关键信息抽取(OCR+llm)")
-    column_head = st.columns([1, 1, 1,1], gap="medium")
-    with column_head[0]:
-        uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
-    with column_head[1]:
-        seal_options = st.multiselect(
-            "印章筛选",
-            ["红色圆章", "灰色圆章"],
-            default=["红色圆章", "灰色圆章"],
-        )
-    with column_head[2]:
-        doc_options = st.selectbox(
-            "文档类型",
-            ["合同", "身份证", "营业执照", "发票"]
-        )
-    with column_head[3]:
-        usecls_options = st.selectbox(
-            "启用文本方向检测",
-            ["启用", "禁用"]
-        )   
-    columns = st.columns(2, gap="medium")
+    
+    # 文件上传区域
+    st.markdown("### 📁 文件上传")
+    uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
+    
     if uploaded_file is not None:
-        with columns[0]:
-            st.divider()
-            user_input = st.text_area(
-                label="请输入要抽取的关键内容",
-                placeholder="如姓名,性别，出生日期"           
-            )
-            button = st.button("开始询问")
-            if button:
-                if not doc_options:
-                    st.error("文档类型不能为空", icon="⚠️")
-                    return
-                if not user_input.strip():
-                    st.error("抽取的关键内容不能为空", icon="⚠️")
-                    return
+        st.success(f"✅ 已上传文件: {uploaded_file.name}")
+        
+        # 配置区域 - 使用 expander 收纳配置选项
+        with st.expander("⚙️ 提取配置", expanded=False):
+            col1, col2 = st.columns(2)
+            with col1:
+                doc_options = st.selectbox(
+                    "文档类型",
+                    ["合同", "身份证", "营业执照", "发票"]
+                )
+                seal_options = st.multiselect(
+                    "印章筛选",
+                    ["红色圆章", "灰色圆章"],
+                    default=["红色圆章", "灰色圆章"],
+                )
+            with col2:
+                usecls_options = st.selectbox(
+                    "启用文本方向检测",
+                    ["启用", "禁用"]
+                )
+        
+        # 查询输入区域
+        st.markdown("### 🎯 关键信息提取")
+        user_input = st.text_area(
+            label="请输入要抽取的关键内容",
+            placeholder="如姓名,性别，出生日期",
+            height=100           
+        )
+        
+        # 执行按钮
+        col_left, col_right = st.columns([1, 4])
+        with col_left:
+            button = st.button("🚀 开始提取", type="primary")
+        
+        # 结果显示区域
+        if button:
+            if not doc_options:
+                st.error("文档类型不能为空", icon="⚠️")
+                return
+            if not user_input.strip():
+                st.error("抽取的关键内容不能为空", icon="⚠️")
+                return
+            
+            # 处理逻辑
+            with st.spinner("🔄 正在处理中..."):
                 url = os.getenv("DFS_URL")
                 files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
                 r = requests.post(url, files=files)
@@ -61,21 +77,37 @@ def main():
                 valid_result = requests.post(os.getenv("CONTRACT_EXTRACT_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
                 print(valid_data)
+                
                 if valid_data.get("code") == "99":
                     st.error(valid_data.get("message"), icon="⚠️")
                     return
-                st.info("提取结果")
-                st.write(valid_data.get("data", {}).get("result", ""))
+                
                 end = time()
                 elapsed = end - start
-                st.info(f"处理花费时间：***{elapsed}***s")
+            
+            # 结果展示 
+            source_col,result_col = st.columns([1, 1])
+            with source_col:
 
-        with columns[1]:
-            st.divider()
-            if button:
-                st.info("合同内容")
-                ocr_text = valid_data.get("data", {}).get("ocrText", "")
-                st.markdown(f"```\n{ocr_text}\n```")
+                st.markdown("#### 📄 处理信息")
+                with st.expander("📋 合同内容", expanded=False):
+                    ocr_text = valid_data.get("data", {}).get("ocrText", "")
+                    if ocr_text:
+                        st.markdown(f"```\n{ocr_text}\n```")
+                    else:
+                        st.info("未获取到合同文本")
+                
+                st.metric("⏱️ 处理时间", f"{elapsed:.2f}s")
+
+            with result_col:  
+                st.markdown("### 📊 提取结果")             
+                result = valid_data.get("data", {}).get("result", "")
+                if result:
+                    st.write(result)
+                else:
+                    st.warning("未提取到相关信息")
+            
+            
 
 
 if __name__ == '__main__':
