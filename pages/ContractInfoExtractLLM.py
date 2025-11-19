@@ -29,14 +29,13 @@ def main():
             "启用文本方向检测",
             ["启用", "禁用"]
         )   
-    columns = st.columns(3, gap="medium")
+    columns = st.columns(2, gap="medium")
     if uploaded_file is not None:
         with columns[0]:
             st.divider()
             user_input = st.text_area(
                 label="请输入要抽取的关键内容",
-                placeholder="如姓名,性别，出生日期",
-                height=150
+                placeholder="如姓名,性别，出生日期"           
             )
             button = st.button("开始询问")
             if button:
@@ -65,22 +64,18 @@ def main():
                 if valid_data.get("code") == "99":
                     st.error(valid_data.get("message"), icon="⚠️")
                     return
-                st.info("合同内容")
-                st.caption(valid_data.get("data", {}).get("ocrText", ""))
-
-        with columns[1]:
-            st.divider()
-            if button:
-                st.info("AI思考过程")
-                st.caption(valid_data.get("data", {}).get("think", ""))
-        with columns[2]:
-            st.divider()
-            if button:
                 st.info("提取结果")
                 st.write(valid_data.get("data", {}).get("result", ""))
                 end = time()
                 elapsed = end - start
                 st.info(f"处理花费时间：***{elapsed}***s")
+
+        with columns[1]:
+            st.divider()
+            if button:
+                st.info("合同内容")
+                ocr_text = valid_data.get("data", {}).get("ocrText", "")
+                st.markdown(f"```\n{ocr_text}\n```")
 
 
 if __name__ == '__main__':
