@@ -24,7 +24,7 @@ def main():
             with col1:
                 doc_options = st.selectbox(
                     "文档类型",
-                    ["合同", "身份证", "营业执照", "发票"]
+                    ["合同", "模板文件", "身份证", "营业执照", "发票"]
                 )
                 seal_options = st.multiselect(
                     "印章筛选",
@@ -69,7 +69,7 @@ def main():
                 file_dfs_url = data["map"]["privateUrl"]
                 select_seal = [1 if color == "红色圆章" else 2 if color == "灰色圆章" else None for color in
                                seal_options]
-                select_doc = 1 if doc_options == "合同" else 2 if doc_options == "身份证" else 3 if doc_options == "营业执照" else 4 if doc_options == "发票" else None
+                select_doc = 1 if doc_options == "合同" else 2 if doc_options == "身份证" else 3 if doc_options == "营业执照" else 4 if doc_options == "发票" else 5 if doc_options == "模板文件" else None
                 print(select_doc)
                 args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc, "useCls": 1 if usecls_options == "启用" else 0,
                         'returnOcrText': 1, 'returnLLMThink': 1}
