@@ -14,8 +14,12 @@ def main():
     if uploaded_file is not None:
         with columns[0]:
             image = Image.open(uploaded_file)
-            image = image.convert("L")
-            st.image(image)
+            # Convert CMYK to RGB before saving as PNG
+            if image.mode == 'CMYK':
+                image = image.convert('RGB')
+            # Convert to grayscale for display
+            image_display = image.convert("L")
+            st.image(image_display)
         with columns[1]:
             with st.spinner("Please waiting..."):
                 start = time()

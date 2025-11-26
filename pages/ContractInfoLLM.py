@@ -31,6 +31,13 @@ def main():
         ) 
     columns = st.columns(3, gap="medium")
     if uploaded_file is not None:
+        # Display uploaded image if it's not a PDF
+        if not uploaded_file.name.lower().endswith('.pdf'):
+            image = Image.open(uploaded_file)
+            # Convert CMYK to RGB if needed
+            if image.mode == 'CMYK':
+                image = image.convert('RGB')
+        
         with columns[0]:
             st.divider()
             user_input = st.text_area(

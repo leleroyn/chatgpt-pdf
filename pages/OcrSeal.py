@@ -68,6 +68,9 @@ def main():
                     start = time()
                     ips_service = IPService()
                     byte_stream = io.BytesIO()
+                    # Convert CMYK to RGB before saving as PNG
+                    if image.mode == 'CMYK':
+                        image = image.convert('RGB')
                     image.save(byte_stream, format='PNG')
                     byte_data = byte_stream.getvalue()
                     results = ips_service.seal_preprocess(byte_data, return_seal_image=True, return_ocr_text=True,

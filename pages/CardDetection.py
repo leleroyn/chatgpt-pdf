@@ -33,6 +33,9 @@ def main():
         with columns[0]:
             st.markdown("### 📷 原始图像")
             image = Image.open(uploaded_file)
+            # Convert CMYK to RGB before saving as PNG
+            if image.mode == 'CMYK':
+                image = image.convert('RGB')
             # Hide original image by default, show in expander
             with st.expander("查看原始图像"):
                 st.image(image, caption="上传的图像")

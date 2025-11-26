@@ -45,6 +45,9 @@ def main():
                 with st.spinner("正在检测营业执照信息..."):
                     ips_service = IPService()
                     byte_stream = io.BytesIO()
+                    # Convert CMYK to RGB before saving as PNG
+                    if image.mode == 'CMYK':
+                        image = image.convert('RGB')
                     image.save(byte_stream, format='PNG')
                     byte_data = byte_stream.getvalue()
                     
