@@ -8,7 +8,7 @@ from PIL import Image
 
 
 class IPService:
-    def seal_preprocess(self, image_bytes, return_seal_image: bool = True, return_ocr_text: bool = True,
+    def seal_preprocess(self, image_bytes, file_type:str = "image", return_seal_image: bool = True, return_ocr_text: bool = True,
                         tool: Tuple[float, bool, bool] = (0.5, True, True)) -> List[Dict]:
         API_URL = os.getenv("IPS_SEAL_PREPROCESS")  # 服务URL
         if not API_URL:
@@ -16,6 +16,7 @@ class IPService:
         image_data = base64.b64encode(image_bytes).decode("utf-8")
         payload = {
             "image_base64": image_data,
+            "file_type": file_type,
             "return_seal_image": return_seal_image,
             "return_ocr_text": return_ocr_text,
             "tool": {"init_confidence": tool[0],

@@ -28,8 +28,8 @@ def main():
         with head_col1:
             uploaded_file = st.file_uploader(
                 "上传印章图片", 
-                type=["png", "jpg", "bmp", "jpeg"],
-                help="支持 PNG, JPG, BMP, JPEG 格式图片"
+                type=["png", "jpg", "bmp", "jpeg", "pdf"],
+                help="支持 PNG, JPG, BMP, JPEG, PDF 格式文件"
             )
         with head_col2:
             conf_size = st.slider(
@@ -49,31 +49,34 @@ def main():
     
     if uploaded_file is not None:
         try:
-            # Load and display the image
-            image = Image.open(uploaded_file)
+            # Load the image or PDF
+            if uploaded_file.type != "application/pdf":
+                # Load the image for display only
+                image = Image.open(uploaded_file)
             
             # Create a three-tier layout as per UI preference
-            # Tier 1: Original image and core detection results
+            # Tier 1: Original file and core detection results
             col1, col2 = st.columns(2)
             
             with col1:
-                st.subheader("原始图像")
-                # Hide original image by default, show in expander
-                with st.expander("查看原始图像"):
-                    st.image(image, use_column_width=True)
+                st.subheader("原始文件")
+                # Hide original file by default, show in expander
+                with st.expander("查看原始文件"):
+                    if uploaded_file.type == "application/pdf":
+                        st.write(f"PDF 文件: {uploaded_file.name}")
+                        st.info("PDF 文件内容预览暂不支持")
+                    else:
+                        st.image(image, use_column_width=True)
             
             with col2:
                 st.subheader("🔍 检测结果")
                 with st.spinner("正在提取印章信息..."):
                     start = time()
                     ips_service = IPService()
-                    byte_stream = io.BytesIO()
-                    # Convert CMYK to RGB before saving as PNG
-                    if image.mode == 'CMYK':
-                        image = image.convert('RGB')
-                    image.save(byte_stream, format='PNG')
-                    byte_data = byte_stream.getvalue()
-                    results = ips_service.seal_preprocess(byte_data, return_seal_image=True, return_ocr_text=True,
+                    byte_data = uploaded_file.getvalue()
+                    
+                    file_type = "pdf" if uploaded_file.type == "application/pdf" else "image"
+                    results = ips_service.seal_preprocess(byte_data, file_type=file_type, return_seal_image=True, return_ocr_text=True,
                                                         tool=(conf_size, True, True))
                     
                     if not results:
