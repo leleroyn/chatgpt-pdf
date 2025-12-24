@@ -1,8 +1,7 @@
 import json
 from time import time
-
+import requests
 import streamlit as st
-
 from service import *
 
 
@@ -20,7 +19,7 @@ def main():
         
         # 配置区域 - 使用 expander 收纳配置选项
         with st.expander("⚙️ 提取配置", expanded=False):
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 doc_options = st.selectbox(
                     "文档类型",
@@ -32,6 +31,18 @@ def main():
                     default=["红色圆章", "灰色圆章"],
                 )
             with col2:
+                app_options = st.selectbox(
+                    "应用名称",
+                    ["实名验证", "融资材料审核", "建档材料审核"]
+                )
+                # Map the selected application name to its corresponding appId
+                app_id_mapping = {
+                    "实名验证": "IVA",
+                    "融资材料审核": "FDR",
+                    "建档材料审核": "ADR"
+                }
+                selected_app_id = app_id_mapping[app_options]
+            with col3:
                 usecls_options = st.selectbox(
                     "启用文本方向检测",
                     ["启用", "禁用"]
@@ -72,7 +83,7 @@ def main():
                 select_doc = 1 if doc_options == "合同" else 2 if doc_options == "身份证" else 3 if doc_options == "营业执照" else 4 if doc_options == "发票" else 5 if doc_options == "模板文件" else None
                 print(select_doc)
                 args = {'fileUrl': file_dfs_url, 'seal': select_seal, "question": user_input, "doc": select_doc, "useCls": 1 if usecls_options == "启用" else 0,
-                        'returnOcrText': 1, 'returnLLMThink': 1}
+                        'returnOcrText': 1, 'returnLLMThink': 1, "appId": selected_app_id}
                 start = time()
                 valid_result = requests.post(os.getenv("CONTRACT_EXTRACT_URL"), json=args)
                 valid_data = json.loads(valid_result.text)
