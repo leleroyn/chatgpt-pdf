@@ -29,7 +29,11 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],temperature=0.1, top_p=0.95,
+            ], temperature=0.1, top_p=0.95,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -54,7 +58,11 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],temperature=0.1, top_p=0.95,
+            ], temperature=0.1, top_p=0.95,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -72,7 +80,11 @@ class OneApiService:
             model=self.model_name,
             messages=[
                 {"role": "user", "content": prompt}
-            ],temperature=0.1, top_p=0.95,
+            ], temperature=0.1, top_p=0.95,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -121,6 +133,10 @@ class OneApiService:
             messages=[
                 {"role": "user", "content": prompt}
             ], temperature=0.1, top_p=0.95,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -179,7 +195,12 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0.1
+            ],
+            temperature=0.1,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            },
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -228,7 +249,12 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0.1
+            ],
+            temperature=0.1,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
@@ -258,7 +284,11 @@ class OneApiService:
                         }
                     ]
                 }
-            ], temperature=0.1
+            ], temperature=0.1,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         print(chat_completion)
         return chat_completion.choices[0].message.content
