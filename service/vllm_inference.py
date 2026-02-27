@@ -69,7 +69,12 @@ def image_inference_with_vllm(
             model=model_name,
             max_completion_tokens=max_completion_tokens,
             temperature=temperature,
-            top_p=top_p)
+            top_p=top_p,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
+        )
         end_time = time.time()  # End timing
         inference_time = (end_time - start_time) * 1000  # Convert to milliseconds
         
@@ -132,7 +137,11 @@ def text_inference_with_llm(
             model=model_name,
             temperature=temperature,
             top_p=top_p,
-            max_tokens=max_tokens
+            max_tokens=max_tokens,
+            extra_body={
+                "top_k": 20,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
         )
         text = response.choices[0].message.content
 
