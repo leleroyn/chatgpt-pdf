@@ -12,7 +12,7 @@ from service.IPService import IPService
 def main():
     load_dotenv()
     st.set_page_config(page_title="卡片检测识别", layout="wide", menu_items={})
-    st.subheader("💳卡片检测识别")
+    st.subheader("💳 卡片检测识别")
     
     # Header section with file uploader and options
     head_col = st.columns(2)

@@ -33,13 +33,10 @@ def main():
                 # Load the image for display only
                 image = Image.open(uploaded_file)
             
-            # Create a three-tier layout as per UI preference
-            # Tier 1: Original file and core detection results
             col1, col2 = st.columns(2)
             
             with col1:
                 st.subheader("原始文件")
-                # Hide original file by default, show in expander
                 with st.expander("显示原始文件"):
                     if uploaded_file.type == "application/pdf":
                         st.write(f"PDF 文件: {uploaded_file.name}")
@@ -160,6 +157,16 @@ def main():
         except Exception as e:
             st.error(f"处理过程中出现错误: {str(e)}")
             st.info("请确保上传的是有效的发票图像，并检查API服务是否正常运行。")
+    else:
+        st.info("💡 请上传发票图片后提取信息")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传发票**: 点击上方上传按钮，选择发票图片或PDF
+            2. **支持格式**: PNG, JPG, BMP, JPEG, PDF
+            3. **置信度阈值**: 调整滑块过滤低置信度结果
+            4. **操作流程**: 上传发票 → OCR检测 → LLM信息提取 → 查看结果
+            5. **功能特点**: 支持多种发票类型，自动识别金额、日期等信息
+            """)
 
 
 if __name__ == '__main__':

@@ -1,17 +1,20 @@
 import json
 from time import time
+import os
+
 import requests
 import streamlit as st
+from dotenv import load_dotenv
+
 from service import *
 
 
 def main():
     load_dotenv()
+    llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="合同关键信息抽取", layout="wide", menu_items={})
-    st.subheader(f"🔍合同关键信息抽取(OCR+llm)")
+    st.subheader(f"📋 合同关键信息抽取(OCR+{llm})")
     
-    # 文件上传区域
-    st.markdown("### 📁 文件上传")
     uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
     
     if uploaded_file is not None:
@@ -117,8 +120,19 @@ def main():
                     st.write(result)
                 else:
                     st.warning("未提取到相关信息")
-            
-            
+    else:
+        st.info("💡 请上传合同影像后提取关键信息")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传合同**: 点击上方上传按钮，选择合同文件
+            2. **支持格式**: PNG, JPG, BMP, PDF
+            3. **配置选项**: 
+               - 文档类型：合同/模板文件/身份证/营业执照/发票
+               - 印章筛选：红色圆章/灰色圆章
+               - 应用名称：实名验证/融资材料审核/建档材料审核
+               - 文本方向检测：启用/禁用
+            4. **操作流程**: 上传合同 → 配置选项 → 输入关键信息 → 开始提取 → 查看结果
+            """)
 
 
 if __name__ == '__main__':

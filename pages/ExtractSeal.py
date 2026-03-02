@@ -14,7 +14,7 @@ def main():
     load_dotenv()
     st.set_page_config(page_title="检测图片中的印章", layout="wide", menu_items={})
     
-    st.subheader("🔎检测图片中的印章")
+    st.subheader("🔴 检测图片中的印章")
     
     # Create a more organized layout
     head_col1, head_col2 = st.columns([3, 1])
@@ -35,7 +35,6 @@ def main():
             
             with col1:
                 st.subheader("原始图像")
-                # Hide original image by default, show in expander
                 with st.expander("查看原始图像"):
                     st.image(image, use_column_width=True)
             
@@ -96,6 +95,15 @@ def main():
         except Exception as e:
             st.error(f"处理过程中出现错误: {str(e)}")
             st.info("请确保上传的是有效的图像，并检查API服务是否正常运行。")
+    else:
+        st.info("💡 请上传图片后检测印章")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传图片**: 点击上方上传按钮，选择图片文件
+            2. **支持格式**: PNG, JPG, BMP, JPEG
+            3. **置信度阈值**: 调整滑块过滤低置信度结果
+            4. **操作流程**: 上传图片 → 自动检测印章 → 查看结果
+            """)
 
 
 if __name__ == '__main__':

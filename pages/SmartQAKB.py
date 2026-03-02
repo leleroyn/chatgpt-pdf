@@ -4,6 +4,7 @@ from time import time
 from datetime import datetime
 
 import streamlit as st
+from dotenv import load_dotenv
 from PIL import Image
 
 from service.OcrService import OcrService
@@ -126,11 +127,9 @@ class SmartQAKB:
 
 
 def main():
-    # 加载环境变量
-    from dotenv import load_dotenv
     load_dotenv()
     
-    # 页面配置
+    llm = os.getenv("LLM_VERSION")
     st.set_page_config(page_title="智能问答(Simple_KB)", layout="wide", menu_items={})
     st.subheader(f"🤖 智能问答(Simple_KB)")
     
@@ -182,7 +181,7 @@ def main():
                 st.error("请输入问题内容")
                 return
             
-            with st.spinner("正在查询知识库..."):
+            with st.spinner("🔄 正在查询知识库..."):
                 try:
                     search_results = qa_system.search_knowledge_base(user_input, top_k=6)
                     st.session_state.search_results = search_results

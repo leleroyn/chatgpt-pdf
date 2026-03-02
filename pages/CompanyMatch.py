@@ -1,10 +1,13 @@
 import streamlit as st
+from dotenv import load_dotenv
+
 from service.CompanyMatchService import CompanyMatchService
 
 
 def main():
+    load_dotenv()
     st.set_page_config(page_title="公司名匹配测试", layout="wide", menu_items={})
-    st.subheader("🔍 公司名匹配测试")
+    st.subheader("🏢 公司名匹配测试")
     
     # 初始化服务
     try:

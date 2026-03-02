@@ -27,17 +27,13 @@ def main():
     
     if uploaded_file is not None:
         try:
-            # Load and display the image
             image = Image.open(uploaded_file)
             
-            # Create a three-tier layout as per UI preference
-            # Tier 1: Original image and core detection results
             col1, col2 = st.columns(2)
             
             with col1:
                 st.subheader("原始图像")
-                # Hide original image by default, show in expander
-                with st.expander("查看原始图像"):
+                with st.expander("显示原始图像"):
                     st.image(image, use_column_width=True)
             
             with col2:
@@ -45,7 +41,6 @@ def main():
                 with st.spinner("正在检测营业执照信息..."):
                     ips_service = IPService()
                     byte_stream = io.BytesIO()
-                    # Convert CMYK to RGB before saving as PNG
                     if image.mode == 'CMYK':
                         image = image.convert('RGB')
                     image.save(byte_stream, format='PNG')
@@ -155,6 +150,16 @@ def main():
         except Exception as e:
             st.error(f"处理过程中出现错误: {str(e)}")
             st.info("请确保上传的是有效的营业执照图像，并检查API服务是否正常运行。")
+    else:
+        st.info("💡 请上传营业执照图片后提取信息")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传营业执照**: 点击上方上传按钮，选择营业执照图片
+            2. **支持格式**: PNG, JPG, BMP, JPEG
+            3. **置信度阈值**: 调整滑块过滤低置信度结果
+            4. **操作流程**: 上传营业执照 → OCR检测 → LLM信息提取 → 查看结果
+            5. **功能特点**: 自动识别企业名称、统一社会信用代码等信息
+            """)
 
 
 if __name__ == '__main__':

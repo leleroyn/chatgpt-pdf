@@ -2,14 +2,16 @@ import json
 from time import time
 
 import streamlit as st
+from dotenv import load_dotenv
 
 from service import *
 
 
 def main():
     load_dotenv()
+    llm = __import__('os').getenv("LLM_VERSION")
     st.set_page_config(page_title="合同信息判定", layout="wide", menu_items={})
-    st.subheader(f"📋合同信息判定(OCR+llm)")
+    st.subheader(f"📋 合同信息判定(OCR+{llm})")
     column_head = st.columns([1, 1, 1, 1, 1], gap="medium")
     with column_head[0]:
         uploaded_file = st.file_uploader("上传合同影像", type=["png", "jpg", "bmp", "pdf"])
@@ -102,6 +104,19 @@ def main():
                 end = time()
                 elapsed = end - start
                 st.info(f"处理花费时间：***{elapsed}***s")
+    else:
+        st.info("💡 请上传合同影像后进行信息判定")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传合同**: 点击上方上传按钮，选择合同文件
+            2. **支持格式**: PNG, JPG, BMP, PDF
+            3. **配置选项**: 
+               - 印章筛选：红色圆章/灰色圆章
+               - 文档类型：合同/身份证/营业执照/发票
+               - 应用名称：实名验证/融资材料审核/建档材料审核
+               - 文本方向检测：启用/禁用
+            4. **操作流程**: 上传合同 → 配置选项 → 输入问题 → 开始询问 → 查看结果
+            """)
 
 
 if __name__ == '__main__':

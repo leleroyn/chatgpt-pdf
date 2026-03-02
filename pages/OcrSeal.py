@@ -16,25 +16,23 @@ from service.PaddleOcrService import PaddleOcrService
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="印章提取(Paddle)", layout="wide", menu_items={})
+    llm = os.getenv("LLM_VERSION")
+    st.set_page_config(page_title="印章提取", layout="wide", menu_items={})
     
-    st.title("🔴 印章提取(Paddle)")
+    st.subheader("🔴 印章提取")
     
-    # Create a more organized layout
-    with st.container():
-        st.markdown("### 📄 上传与配置")
-        head_col1, head_col2, head_col3 = st.columns([2, 1, 1])
-        
-        with head_col1:
-            uploaded_file = st.file_uploader(
-                "上传印章图片", 
-                type=["png", "jpg", "bmp", "jpeg", "pdf"],
-                help="支持 PNG, JPG, BMP, JPEG, PDF 格式文件"
-            )
-        with head_col2:
-            conf_size = st.slider(
-                '置信度阈值', 
-                min_value=0.1, 
+    head_col1, head_col2, head_col3 = st.columns([2, 1, 1])
+    
+    with head_col1:
+        uploaded_file = st.file_uploader(
+            "上传印章图片", 
+            type=["png", "jpg", "bmp", "jpeg", "pdf"],
+            help="支持 PNG, JPG, BMP, JPEG, PDF 格式文件"
+        )
+    with head_col2:
+        conf_size = st.slider(
+            '置信度阈值', 
+            min_value=0.1, 
                 max_value=1.0, 
                 step=0.1, 
                 value=0.6,
@@ -145,6 +143,16 @@ def main():
         except Exception as e:
             st.error(f"❌ 处理过程中出现错误: {str(e)}")
             st.info("💡 请确保上传的是有效的图像，并检查API服务是否正常运行。")
+    else:
+        st.info("💡 请上传图片后提取印章信息")
+        with st.expander("📖 使用说明"):
+            st.markdown("""
+            1. **上传图片**: 点击上方上传按钮，选择图片文件
+            2. **支持格式**: PNG, JPG, BMP, JPEG, PDF
+            3. **置信度阈值**: 调整滑块过滤低置信度结果
+            4. **第三方识别**: 可启用第三方引擎进行更精确的识别
+            5. **操作流程**: 上传图片 → 提取印章 → 查看OCR结果
+            """)
 
 
     st.markdown("---")
