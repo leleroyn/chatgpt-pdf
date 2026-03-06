@@ -14,13 +14,7 @@ def main():
     st.set_page_config(page_title="发票信息提取", layout="wide", menu_items={})
     st.subheader(f"🧾 发票信息提取 (OCR+{llm})")
 
-    # Create a more organized layout
-    head_col1, head_col2 = st.columns([3, 1])
-    with head_col1:
-        uploaded_file = st.file_uploader("上传发票影像", type=["png", "jpg", "bmp", "jpeg", "pdf"])
-    with head_col2:
-        conf_size = st.slider('置信度阈值', min_value=0.1, max_value=1.0, step=0.1, value=0.8)
-        st.caption("置信度低于阈值的结果将被过滤")
+    uploaded_file = st.file_uploader("上传发票影像", type=["png", "jpg", "bmp", "jpeg", "pdf"])
 
     if uploaded_file is not None:
         try:
@@ -116,9 +110,8 @@ def main():
             st.markdown("""
             1. **上传发票**: 点击上方上传按钮，选择发票图片或 PDF
             2. **支持格式**: PNG, JPG, BMP, JPEG, PDF
-            3. **置信度阈值**: 调整滑块过滤低置信度结果
-            4. **操作流程**: 上传发票 → OCR 检测 → LLM 信息提取 → 查看结果
-            5. **功能特点**: 支持多种发票类型，自动识别金额、日期等信息
+            3. **操作流程**: 上传发票 → OCR 检测 → 查看结果
+            4. **功能特点**: 支持多种发票类型，自动识别金额、日期等信息
             """)
 
 
