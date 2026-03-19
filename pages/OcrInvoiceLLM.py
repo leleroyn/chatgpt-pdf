@@ -25,25 +25,25 @@ def main():
 
             col1, col2 = st.columns(2)
 
+            # Upload to DFS and get URL
+            url = os.getenv("DFS_URL")
+            files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
+            r = requests.post(url, files=files)
+            data = json.loads(r.text)
+            file_dfs_url = data["map"]["privateUrl"]
+
             with col1:
                 st.subheader("原始文件")
                 with st.expander("显示原始文件"):
                     if uploaded_file.type == "application/pdf":
                         st.write(f"PDF 文件：{uploaded_file.name}")
-                        st.info("PDF 文件内容预览暂不支持")
+                        st.markdown(f"[{file_dfs_url}]({file_dfs_url})")
                     else:
                         st.image(image, use_column_width=True)
 
             with col2:
                 st.subheader("检测结果")
                 with st.spinner("正在检测发票信息..."):
-                    url = os.getenv("DFS_URL")
-                    files = {'file': (uploaded_file.name, uploaded_file.getvalue())}
-                    r = requests.post(url, files=files)
-                    data = json.loads(r.text)
-                    print(data)
-                    file_dfs_url = data["map"]["privateUrl"]
-
                     headers = {
                         'Content-Type': 'text/plain'
                     }
@@ -78,7 +78,7 @@ def main():
                             st.markdown(f"**开票日期**: {invoice_data.get('invoiceDate', 'N/A')}")
                             st.markdown(f"**校验码**: {invoice_data.get('verifyCode', 'N/A')}")
 
-                       with col2:
+                        with col2:
                             invoice_amt = invoice_data.get('invoiceAmt')
                             invoice_sum = invoice_data.get('invoiceSum')
                             st.markdown(f"**发票金额**: ¥{invoice_amt if invoice_amt not in [None, 'N/A', ''] else 'N/A'}")
