@@ -63,20 +63,26 @@ def main():
                         st.success(f"✅ 发票识别成功")
 
                         # Display invoice information in a clean format
-                        info_col1, info_col2 = st.columns(2)
+                        col1, col2, col3 = st.columns(3)
 
-                        with info_col1:
+                        with col1:
                             st.markdown(f"**发票类型**: {invoice_data.get('invoiceType', 'N/A')}")
                             st.markdown(f"**发票代码**: {invoice_data.get('invoiceCode', 'N/A')}")
                             st.markdown(f"**发票号码**: {invoice_data.get('invoiceNo', 'N/A')}")
                             st.markdown(f"**开票日期**: {invoice_data.get('invoiceDate', 'N/A')}")
                             st.markdown(f"**校验码**: {invoice_data.get('verifyCode', 'N/A')}")
 
-                        with info_col2:
-                            st.markdown(f"**发票总金额**: ¥{invoice_data.get('invoiceSum', 'N/A')}")
+                        with col2:
                             st.markdown(f"**发票金额**: ¥{invoice_data.get('invoiceAmt', 'N/A')}")
+                            st.markdown(f"**发票总金额**: ¥{invoice_data.get('invoiceSum', 'N/A')}")
                             st.markdown(f"**销售方名称**: {invoice_data.get('salerName', 'N/A')}")
                             st.markdown(f"**购买方名称**: {invoice_data.get('purchaserName', 'N/A')}")
+
+                        with col3:
+                            is_deduction = invoice_data.get('isDeduction', 'N/A')
+                            has_seal = invoice_data.get('hasInvSeal', 'N/A')
+                            st.markdown(f"**是否抵扣联**: {'是' if str(is_deduction).lower() == 'true' else '否' if is_deduction != 'N/A' else 'N/A'}")
+                            st.markdown(f"**是否包含国税局印章**: {'是' if str(has_seal).lower() == 'true' else '否' if has_seal != 'N/A' else 'N/A'}")
 
                         st.divider()
 
