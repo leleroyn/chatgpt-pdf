@@ -62,6 +62,12 @@ def main():
 
                         st.success(f"✅ 发票识别成功")
 
+                        # Helper function to format boolean values
+                        def format_boolean(value, true_str="是", false_str="否", default="N/A"):
+                            if value == "N/A":
+                                return "N/A"
+                            return true_str if str(value).strip().lower() == "true" else false_str
+
                         # Display invoice information in a clean format
                         col1, col2, col3 = st.columns(3)
 
@@ -72,17 +78,19 @@ def main():
                             st.markdown(f"**开票日期**: {invoice_data.get('invoiceDate', 'N/A')}")
                             st.markdown(f"**校验码**: {invoice_data.get('verifyCode', 'N/A')}")
 
-                        with col2:
-                            st.markdown(f"**发票金额**: ¥{invoice_data.get('invoiceAmt', 'N/A')}")
-                            st.markdown(f"**发票总金额**: ¥{invoice_data.get('invoiceSum', 'N/A')}")
+                       with col2:
+                            invoice_amt = invoice_data.get('invoiceAmt')
+                            invoice_sum = invoice_data.get('invoiceSum')
+                            st.markdown(f"**发票金额**: ¥{invoice_amt if invoice_amt not in [None, 'N/A', ''] else 'N/A'}")
+                            st.markdown(f"**发票总金额**: ¥{invoice_sum if invoice_sum not in [None, 'N/A', ''] else 'N/A'}")
                             st.markdown(f"**销售方名称**: {invoice_data.get('salerName', 'N/A')}")
                             st.markdown(f"**购买方名称**: {invoice_data.get('purchaserName', 'N/A')}")
 
                         with col3:
                             is_deduction = invoice_data.get('isDeduction', 'N/A')
                             has_seal = invoice_data.get('hasInvSeal', 'N/A')
-                            st.markdown(f"**是否抵扣联**: {'是' if str(is_deduction).lower() == 'true' else '否' if is_deduction != 'N/A' else 'N/A'}")
-                            st.markdown(f"**是否包含国税局印章**: {'是' if str(has_seal).lower() == 'true' else '否' if has_seal != 'N/A' else 'N/A'}")
+                            st.markdown(f"**是否抵扣联**: {format_boolean(is_deduction)}")
+                            st.markdown(f"**是否包含国税局印章**: {format_boolean(has_seal)}")
 
                         st.divider()
 
